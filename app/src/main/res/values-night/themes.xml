@@ -1,0 +1,7 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.Impostor" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>          <item name="colorAccent">@color/colorAccent</item>            <item name="android:colorBackground">@color/background_dark</item>  <item name="colorSurface">@color/surface_dark</item>                <item name="colorOnBackground">@color/text_primary_darkmode</item> <item name="colorOnSurface">@color/text_primary_darkmode</item>    <item name="colorSecondary">@color/text_secondary_darkmode</item>  <item name="dividerColor">@color/divider_color_darkmode</item>    </style>
+
+    <style name="Theme.Impostor" parent="Base.Theme.Impostor" />
+
+</resources>

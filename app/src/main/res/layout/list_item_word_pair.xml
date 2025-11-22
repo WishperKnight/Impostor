@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="8dp"
+    android:paddingHorizontal="12dp">
+
+    <TextView
+        android:id="@+id/tv_label_secret"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Civil:"
+        android:textStyle="bold"
+        android:textColor="@color/text_primary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_word_secret"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="PALABRA SECRETA"
+        android:textColor="@color/text_primary"
+        android:layout_marginStart="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:layout_constraintStart_toEndOf="@id/tv_label_secret"
+        app:layout_constraintTop_toTopOf="@id/tv_label_secret"
+        app:layout_constraintEnd_toStartOf="@id/btn_delete_pair"/>
+
+    <TextView
+        android:id="@+id/tv_label_impostor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pista:"
+        android:textStyle="bold"
+        android:textColor="@color/text_secondary"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_label_secret" />
+
+    <TextView
+        android:id="@+id/tv_word_impostor"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="PISTA RELACIONADA"
+        android:textColor="@color/text_secondary"
+        android:layout_marginStart="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:layout_constraintStart_toEndOf="@id/tv_label_impostor"
+        app:layout_constraintTop_toTopOf="@id/tv_label_impostor"
+        app:layout_constraintEnd_toStartOf="@id/btn_delete_pair"/>
+
+    <ImageButton
+        android:id="@+id/btn_delete_pair"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/ic_delete"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Borrar par de palabras"
+        app:tint="@color/red_error"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
