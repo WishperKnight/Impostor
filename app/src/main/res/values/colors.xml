@@ -13,6 +13,9 @@
     <color name="text_primary">@color/black</color>
     <color name="text_secondary">#AAAAAA</color>
     <color name="divider_color">#E0E0E0</color>
+
+    <color name="colorTituloDialogo">#212121</color>
+    <color name="colorPrimaryApp">#3700B3</color>
     <color name="red_error">#FA0000</color>
 
     <color name="background_dark">#121212</color>      <color name="surface_dark">#1D1D1D</color>

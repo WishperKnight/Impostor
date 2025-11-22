@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects; // Importar java.util.Objects
 import java.util.Random;
 
 public class Categoria implements Serializable {
@@ -39,6 +40,30 @@ public class Categoria implements Serializable {
         this.word = keys.get(randomIndex);
         this.clue = palabras.get(word);
     }
+
+    // ******************************************************
+    // EQUALS Y HASHCODE (CORRECCIÓN CRÍTICA)
+    // ******************************************************
+
+    /**
+     * Dos Categorías son iguales si tienen el mismo nombre.
+     * Esto es crucial para la selección en Listas (e.g., selectedCategories.contains()).
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Categoria categoria = (Categoria) o;
+        // Solo necesitamos que el nombre coincida para identificar la categoría
+        return Objects.equals(name, categoria.name);
+    }
+
+    @Override
+    public int hashCode() {
+        // Generar el hashCode basado únicamente en el nombre
+        return Objects.hash(name);
+    }
+
     //******************************************************
     // GETTERS Y SETTERS
     //******************************************************

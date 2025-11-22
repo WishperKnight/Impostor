@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -29,6 +30,11 @@ import ies.carrillo.impostor.roles.Roles;
 
 public class JuegoActivity extends AppCompatActivity {
 
+    // Constantes de Claves de Intent (Definidas en MainActivity para consistencia)
+    // Aquí usamos las cadenas literales ya que no podemos asumir la clase de constantes
+    private static final String KEY_JUGADORES = "JUGADORES_CON_ROLES";
+    private static final String KEY_CATEGORIA = "CATEGORIA_SELECCIONADA";
+
     // Vistas
     private TextView tvCurrentPlayerName;
     private TextView tvPlayerRole;
@@ -44,7 +50,7 @@ public class JuegoActivity extends AppCompatActivity {
     private int currentPlayerIndex = 0;
     private boolean isRoleRevealed = false;
 
-    // Constantes de estado del botón
+    // Constante de estado del botón
     private static final String STATE_REVEAL = "REVELAR ROL Y PALABRA";
 
     @Override
@@ -62,12 +68,10 @@ public class JuegoActivity extends AppCompatActivity {
         recuperarDatosDeIntent();
         configurarListeners();
 
-        // Iniciar el primer turno
         if (jugadores != null && !jugadores.isEmpty()) {
             mostrarTurnoActual();
         } else {
-            // Este caso ya se maneja en recuperarDatosDeIntent, pero se mantiene como backup
-            Toast.makeText(this, "Error: No se pudieron cargar los jugadores.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Error: El juego no tiene jugadores válidos.", Toast.LENGTH_LONG).show();
             finish();
         }
     }
@@ -91,21 +95,15 @@ public class JuegoActivity extends AppCompatActivity {
             return;
         }
 
-        // 1. Intentar recuperar la lista de jugadores con roles asignados
-        jugadores = (List<Jugador>) intent.getSerializableExtra("JUGADORES_CON_ROLES");
+        // 1. Recuperar la lista de jugadores con roles asignados
+        jugadores = (List<Jugador>) intent.getSerializableExtra(KEY_JUGADORES);
 
-        // 2. Intentar recuperar la categoría seleccionada
-        categoriaSeleccionada = (Categoria) intent.getSerializableExtra("CATEGORIA_SELECCIONADA");
+        // 2. Recuperar la categoría seleccionada
+        categoriaSeleccionada = (Categoria) intent.getSerializableExtra(KEY_CATEGORIA);
 
-        // 3. Verificación de seguridad y finalización si faltan datos
-        if (jugadores == null || jugadores.isEmpty()) {
-            Toast.makeText(this, "Error: No se pudo iniciar el juego. Faltan jugadores o roles.", Toast.LENGTH_LONG).show();
-            finish();
-            return;
-        }
-
-        if (categoriaSeleccionada == null) {
-            Toast.makeText(this, "Error: No se pudo iniciar el juego. Falta la categoría.", Toast.LENGTH_LONG).show();
+        // 3. Verificación de datos
+        if (jugadores == null || jugadores.isEmpty() || categoriaSeleccionada == null) {
+            Toast.makeText(this, "Error: Faltan datos críticos para iniciar el juego.", Toast.LENGTH_LONG).show();
             finish();
             return;
         }
@@ -113,7 +111,7 @@ public class JuegoActivity extends AppCompatActivity {
         // 💥 FIX CRÍTICO: SELECCIONAR LA PALABRA ALEATORIA AL INICIO
         // Esto inicializa getWord() y getClue() para toda la partida.
         categoriaSeleccionada.seleccionarPalabraAleatoria();
-
+        Log.i("Categoria",categoriaSeleccionada.getName());
     }
 
     private void configurarListeners() {
@@ -127,16 +125,14 @@ public class JuegoActivity extends AppCompatActivity {
 
     /**
      * Alterna entre el estado de oculto y revelado.
-     * Este método solo se encarga de REVELAR el rol.
      */
     private void handleActionButton() {
         if (!isRoleRevealed) {
-            // Estado 1: Revelar
             revelarRol();
             isRoleRevealed = true;
 
             // 1. Deshabilitar el botón de acción una vez se ha revelado
-            btnAction.setText("ROL REVELADO");
+            btnAction.setText(getString(R.string.btn_role_revealed)); // Usar string resource si existe
             btnAction.setEnabled(false);
 
             // 2. Mostrar el botón de siguiente
@@ -153,31 +149,27 @@ public class JuegoActivity extends AppCompatActivity {
         llRoleContent.setVisibility(View.VISIBLE);
 
         String rolDisplay;
+        String wordToDisplay;
 
-        // Obtener el contexto para getColor, usando ContextCompat para mejor práctica
+        // Cargar colores una sola vez
         int colorCivil = ContextCompat.getColor(this, R.color.colorPrimary);
         int colorImpostor = ContextCompat.getColor(this, R.color.icon_impostor);
-        String wordToDisplay; // Variable temporal para la palabra/pista
 
         // 1. Lógica condicional
         if (rolActual == Roles.IMPOSTOR) {
-            rolDisplay = getResources().getString(R.string.impostor); // IMPOSTOR
-            wordToDisplay = categoriaSeleccionada.getClue(); // Ya no es null gracias al FIX
-
+            rolDisplay = getResources().getString(R.string.impostor);
+            // La pista del impostor (solo si está habilitado en Main)
+            // Aquí deberías comprobar si las pistas están habilitadas, si no, usarías un mensaje genérico.
+            wordToDisplay = categoriaSeleccionada.getClue();
             tvPlayerRole.setTextColor(colorImpostor);
-
         } else { // Roles.CIVIL
-            rolDisplay = getResources().getString(R.string.civil); // CIVIL
-            wordToDisplay = categoriaSeleccionada.getWord(); // Ya no es null gracias al FIX
-
+            rolDisplay = getResources().getString(R.string.civil);
+            wordToDisplay = categoriaSeleccionada.getWord();
             tvPlayerRole.setTextColor(colorCivil);
         }
 
-        // 2. Asignación final (se hace solo una vez)
-        // Se añade un manejo de nulos por si acaso, aunque ya no debería ocurrir
-        tvPlayerWord.setText(wordToDisplay != null ? wordToDisplay.toUpperCase() : "ERROR: PALABRA PERDIDA");
-
-        // 3. Asignar el texto del rol
+        // 2. Asignación final
+        tvPlayerWord.setText(wordToDisplay != null ? wordToDisplay.toUpperCase() : "ERROR");
         tvPlayerRole.setText(rolDisplay);
     }
 
@@ -194,7 +186,7 @@ public class JuegoActivity extends AppCompatActivity {
 
             // --- REINICIO DE ESTADOS DE BOTONES ---
             btnAction.setText(STATE_REVEAL);
-            btnAction.setEnabled(true); // Habilitar el botón "Revelar" para el nuevo jugador
+            btnAction.setEnabled(true);
             btnNextPlayer.setVisibility(View.GONE);
             // -------------------------------------
 
@@ -207,38 +199,38 @@ public class JuegoActivity extends AppCompatActivity {
         } else {
             // Todos los jugadores han visto su rol
             Toast.makeText(this, "¡Todos listos! Comienza el debate.", Toast.LENGTH_LONG).show();
+
+            // Pasar los datos necesarios a InGameActivity
             Intent intent = new Intent(JuegoActivity.this, InGameActivity.class);
-            intent.putExtra("JUGADORES_CON_ROLES", (Serializable) jugadores);
-            intent.putExtra("CATEGORIA_SELECCIONADA", categoriaSeleccionada); // Opcional: pasar la categoría a la siguiente Activity
+            intent.putExtra(KEY_JUGADORES, (Serializable) jugadores);
+
+            // La categoría ya tiene la palabra seleccionada, la enviamos completa
+            intent.putExtra(KEY_CATEGORIA, categoriaSeleccionada);
+
+            // NOTA: Recuerda enviar también la duración del juego y si las pistas están habilitadas, si son necesarias en InGameActivity.
+
             startActivity(intent);
             finish();
         }
     }
 
     /**
-     * Actualiza el nombre del jugador que debe tomar el dispositivo.
+     * Actualiza el nombre del jugador que debe tomar el dispositivo y muestra un diálogo de advertencia.
      */
     private void mostrarTurnoActual() {
         // 1. Obtener el jugador actual
         Jugador actual = jugadores.get(currentPlayerIndex);
 
-        // 2. Actualizar el TextView (esto se mantiene igual)
-        tvCurrentPlayerName.setText("Turno de " + actual.getName().toUpperCase());
+        // 2. Actualizar el TextView principal
+        tvCurrentPlayerName.setText(getString(R.string.turn_of, actual.getName().toUpperCase()));
 
-        // 3. Crear el mensaje para el diálogo
-        String mensaje = "Pasa el dispositivo a " + actual.getName();
-
-        // 4. Crear y mostrar el AlertDialog
-        new AlertDialog.Builder(this)
-                .setTitle("¡Cambio de Turno!") // Título del diálogo
-                .setMessage(mensaje)          // El mensaje que antes estaba en el Toast
-                // Opcional: Agregar un botón para que el usuario lo cierre
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Código si se necesita hacer algo al cerrar el diálogo
-                    }
-                })
-                .setIcon(android.R.drawable.ic_dialog_info) // Un icono, opcional
+        // 3. Crear y mostrar el AlertDialog (Mejorado para claridad)
+        new AlertDialog.Builder(this, R.style.AlertDialogTheme) // Usar un tema si tienes uno personalizado
+                .setTitle(getString(R.string.dialog_turn_change_title))
+                .setMessage(getString(R.string.dialog_pass_device_to, actual.getName().toUpperCase()))
+                .setCancelable(false) // Forzar que el usuario presione OK
+                .setPositiveButton("OK", null) // Simplemente cierra el diálogo
+                .setIcon(R.drawable.ic_player_transfer) // Usar un icono de transferencia, si existe
                 .show();
     }
 }

@@ -3,7 +3,6 @@ package ies.carrillo.impostor.dataBase;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 import ies.carrillo.impostor.model.Categoria;
 import ies.carrillo.impostor.model.Jugador;
@@ -26,13 +25,8 @@ public class DataBase {
     // ------------------------
 
     // --- Datos Principales ---
-    // Almacena la lista de jugadores que se van a usar en la partida.
     private final ArrayList<Jugador> jugadores = new ArrayList<>();
-
-    // Almacena las categorías predefinidas (Semana Santa, Naturaleza, etc.).
-    // Suelen ser de solo lectura.
     private final ArrayList<Categoria> predefinidas = new ArrayList<>();
-
     // Lista mutable para las categorías personalizadas creadas por el usuario.
     private final List<Categoria> customCategories = new ArrayList<>();
 
@@ -86,19 +80,12 @@ public class DataBase {
         predefinidas.add(naturaleza);
     }
 
-    // --- MÉTODOS DE JUGADORES (Actualizados) ---
+    // --- MÉTODOS DE JUGADORES ---
 
-    /**
-     * Obtiene la lista de jugadores configurados para la partida.
-     */
     public ArrayList<Jugador> getJugadores() {
         return jugadores;
     }
 
-    /**
-     * Reemplaza la lista actual de jugadores con la lista proporcionada.
-     * Utilizado en AddPlayersActivity para guardar la configuración.
-     */
     public void setJugadores(ArrayList<Jugador> nuevosJugadores) {
         this.jugadores.clear();
         this.jugadores.addAll(nuevosJugadores);
@@ -106,9 +93,6 @@ public class DataBase {
 
     // --- MÉTODOS DE CATEGORÍAS PREDEFINIDAS ---
 
-    /**
-     * Obtiene la lista de todas las categorías predefinidas.
-     */
     public ArrayList<Categoria> getCategorias() {
         return predefinidas;
     }
@@ -123,22 +107,18 @@ public class DataBase {
 
     // --- MÉTODOS PARA CATEGORÍAS PERSONALIZADAS MÚLTIPLES ---
 
-    /**
-     * Obtiene la lista de todas las categorías personalizadas creadas por el usuario.
-     */
     public List<Categoria> getCustomCategories() {
         return customCategories;
     }
 
     /**
      * Guarda o actualiza una categoría personalizada.
-     * Si ya existe un paquete con el mismo nombre, lo reemplaza.
      */
     public void saveCustomCategory(Categoria categoria) {
-        // Lógica de reemplazo (útil para la edición)
-        customCategories.removeIf(cat -> Objects.equals(cat.getName(), categoria.getName()));
+        // Eliminar la versión antigua si existe (comparando por nombre gracias a equals/hashCode)
+        customCategories.remove(categoria);
 
-        // Añadir el nuevo o el actualizado
+        // Añadir el nuevo o el actualizado (la instancia actual)
         customCategories.add(categoria);
     }
 

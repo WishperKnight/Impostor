@@ -29,29 +29,28 @@ import ies.carrillo.impostor.dataBase.DataBase;
 import ies.carrillo.impostor.model.Categoria;
 import ies.carrillo.impostor.adapters.PackagesExpandableAdapter;
 
-// Implementamos la nueva interfaz del adaptador
+// Implementamos la interfaz del adaptador y el click del grupo
 public class SelectPackagesActivity extends AppCompatActivity
         implements PackagesExpandableAdapter.OnPackageActionListener, ExpandableListView.OnGroupClickListener {
 
     // Vistas
-    private ExpandableListView expandablePackagesList; // ¡Nueva Vista!
+    private ExpandableListView expandablePackagesList;
     private MaterialButton btnConfirmPackages;
 
     // Adaptador
     private PackagesExpandableAdapter adapter;
 
     // Data para el juego
-    private List<Categoria> selectedCategories;
+    // CRÍTICO: Inicializada como lista vacía, pero se reasigna en recuperarEstadoSeleccion()
+    private List<Categoria> selectedCategories = new ArrayList<>();
 
     // Constantes de nombres
-    private final String PACKAGE_SEMANA_SANTA = "Semana Santa";
-    private final String PACKAGE_NATURALEZA = "Naturaleza";
     private final String PACKAGE_CUSTOM_GROUP = "Personalizadas";
 
-    // Launcher para volver de crear paquete
+    // Launcher para volver de crear/editar paquete
     private ActivityResultLauncher<Intent> createPackageLauncher;
 
-    // Launcher para editar paquete (para diferenciar si volvemos de crear vs editar)
+    // Variable temporal para saber si el resultado es de una edición
     private Categoria currentEditingCategory = null;
 
 
@@ -67,11 +66,11 @@ public class SelectPackagesActivity extends AppCompatActivity
             return insets;
         });
 
-        // Inicializar la lista de selección, por defecto vacía.
-        this.selectedCategories = new ArrayList<>();
-
         inicializarVistas();
         setupActivityLauncher();
+
+        // CORRECCIÓN CRÍTICA: Recuperar la lista de categorías que viene de MainActivity
+        recuperarEstadoSeleccion();
 
         // Cargar datos y configurar la lista
         setupExpandableList();
@@ -79,8 +78,26 @@ public class SelectPackagesActivity extends AppCompatActivity
         updateConfirmButton();
     }
 
+    /**
+     * Recupera la lista de categorías seleccionadas de MainActivity (si existe).
+     */
+    private void recuperarEstadoSeleccion() {
+        Intent intent = getIntent();
+        // Usamos la constante de clave de MainActivity
+        Serializable categoriesExtra = intent.getSerializableExtra(MainActivity.KEY_SELECTED_CATEGORIES);
+
+        if (categoriesExtra instanceof List) {
+            // CRÍTICO: Asignamos la lista recibida a la variable de clase.
+            // El adaptador usará esta misma referencia.
+            this.selectedCategories = (List<Categoria>) categoriesExtra;
+        } else {
+            // Si no se recibió nada (o se recibió null), aseguramos que la lista sea una nueva y vacía.
+            this.selectedCategories = new ArrayList<>();
+        }
+    }
+
+
     private void inicializarVistas() {
-        // cardSemanaSanta, cbSemanaSanta, etc. ELIMINADOS
         expandablePackagesList = findViewById(R.id.expandable_packages_list);
         btnConfirmPackages = findViewById(R.id.btn_confirm_packages);
 
@@ -90,18 +107,29 @@ public class SelectPackagesActivity extends AppCompatActivity
     // --- Lógica del ExpandableListView ---
 
     private void setupExpandableList() {
-        // 1. Nombres de los Grupos (Orden Fijo)
-        List<String> groupNames = Arrays.asList(PACKAGE_SEMANA_SANTA, PACKAGE_NATURALEZA, PACKAGE_CUSTOM_GROUP);
+        // Nombres de los Grupos (Orden Fijo: Predefinidas y Personalizadas)
+        List<String> groupNames = Arrays.asList(
+                DataBase.getInstance().getSemanaSanta().getName(), // "Semana Santa"
+                DataBase.getInstance().getNaturaleza().getName(),  // "Naturaleza"
+                PACKAGE_CUSTOM_GROUP
+        );
 
-        // 2. Mapeo de Grupos a Hijos
+        // Cargar datos del DB
         HashMap<String, List<Categoria>> groupChildren = getPackageData();
 
-        // 3. Crear el adaptador
+        // Crear el adaptador, pasando la lista de categorías seleccionadas.
         adapter = new PackagesExpandableAdapter(this, groupNames, groupChildren, selectedCategories, this);
         expandablePackagesList.setAdapter(adapter);
 
-        // 4. Configurar listeners
+        // Configurar listeners
         expandablePackagesList.setOnGroupClickListener(this);
+
+        // CORRECCIÓN: Forzar la expansión del grupo "Personalizadas" al inicio
+        // para que la opción "CREAR NUEVO PAQUETE" siempre esté visible.
+        int customGroupPos = adapter.getGroupPosition(PACKAGE_CUSTOM_GROUP);
+        if (customGroupPos != -1) {
+            expandablePackagesList.expandGroup(customGroupPos);
+        }
     }
 
     /**
@@ -111,28 +139,33 @@ public class SelectPackagesActivity extends AppCompatActivity
         DataBase db = DataBase.getInstance();
         HashMap<String, List<Categoria>> data = new HashMap<>();
 
-        // 1. Paquetes predefinidos (los hijos están vacíos, se gestionan en el GroupView)
-        data.put(PACKAGE_SEMANA_SANTA, new ArrayList<>());
-        data.put(PACKAGE_NATURALEZA, new ArrayList<>());
+        // 1. Paquetes predefinidos (gestionados directamente en el GroupView)
+        data.put(db.getSemanaSanta().getName(), new ArrayList<>());
+        data.put(db.getNaturaleza().getName(), new ArrayList<>());
 
         // 2. Paquetes personalizados (los hijos son las categorías personalizadas)
-        // ASUMIMOS que DataBase tiene un método getCustomCategories()
-        List<Categoria> customCats = db.getCustomCategories();
-        data.put(PACKAGE_CUSTOM_GROUP, customCats);
-
-        // 3. Inicializar selectedCategories.
-        // Si el DataBase guarda un estado de selección inicial, cargar aquí.
-        // Si no, la lista está vacía por defecto.
+        data.put(PACKAGE_CUSTOM_GROUP, db.getCustomCategories());
 
         return data;
     }
 
     /**
-     * Recarga los datos y notifica al adaptador.
+     * Recarga los datos del DataBase y notifica al adaptador para refrescar la UI.
      */
     private void reloadDataAndRefreshUI() {
+        // 1. Obtener la nueva estructura de datos
         HashMap<String, List<Categoria>> newChildren = getPackageData();
+
+        // 2. Actualizar el adaptador con los nuevos datos (incluye los personalizados)
         adapter.updateData(newChildren);
+
+        // 3. Forzar la expansión del grupo de personalizadas
+        int customGroupPos = adapter.getGroupPosition(PACKAGE_CUSTOM_GROUP);
+        if (customGroupPos != -1) {
+            expandablePackagesList.expandGroup(customGroupPos);
+        }
+
+        // 4. Actualizar el botón de confirmación
         updateConfirmButton();
     }
 
@@ -144,7 +177,7 @@ public class SelectPackagesActivity extends AppCompatActivity
 
         // Permitir que el grupo 'Personalizadas' se expanda/colapse
         // Impedir expansión de los grupos predefinidos (solo usa el CheckBox dentro)
-        return !groupName.equals(PACKAGE_CUSTOM_GROUP);
+        return groupName.equals(PACKAGE_CUSTOM_GROUP);
     }
 
 
@@ -153,7 +186,7 @@ public class SelectPackagesActivity extends AppCompatActivity
     @Override
     public void onGroupCheckboxToggled(String groupName, boolean isChecked) {
         DataBase db = DataBase.getInstance();
-        // Encuentra la categoría predefinida en la lista principal del DB
+        // Buscar categoría predefinida
         Categoria category = db.getCategorias().stream()
                 .filter(cat -> cat.getName().equals(groupName))
                 .findFirst().orElse(null);
@@ -168,7 +201,6 @@ public class SelectPackagesActivity extends AppCompatActivity
             selectedCategories.remove(category);
         }
         updateConfirmButton();
-        // No refrescamos el adaptador aquí porque solo se actualiza la casilla.
     }
 
     @Override
@@ -187,24 +219,23 @@ public class SelectPackagesActivity extends AppCompatActivity
     public void onEditPackageClicked(Categoria category) {
         currentEditingCategory = category; // Guardamos la categoría que estamos editando
         Intent intent = new Intent(this, CreatePackageActivity.class);
-        // Pasamos la categoría existente para que la Activity la cargue
-        intent.putExtra("CATEGORY_TO_EDIT", category);
+        // Usamos la constante del Activity
+        intent.putExtra(CreatePackageActivity.CATEGORY_TO_EDIT_KEY, category);
         createPackageLauncher.launch(intent);
     }
 
     @Override
     public void onDeletePackageClicked(Categoria category) {
         new AlertDialog.Builder(this)
-                .setTitle("Confirmar Borrado")
-                .setMessage("¿Estás seguro de que deseas borrar permanentemente el paquete '" + category.getName() + "'?")
-                .setPositiveButton("BORRAR", (dialog, which) -> {
-                    // ASUMIMOS que DataBase tiene un método deleteCustomCategory()
+                .setTitle(getString(R.string.dialog_delete_title)) // Usar String Resource
+                .setMessage(getString(R.string.dialog_delete_message, category.getName())) // Usar String Resource
+                .setPositiveButton(getString(R.string.dialog_delete_positive), (dialog, which) -> {
                     DataBase.getInstance().deleteCustomCategory(category);
-                    selectedCategories.remove(category); // Asegurarse de que se deselecciona si estaba seleccionada
-                    Toast.makeText(this, "Paquete '" + category.getName() + "' borrado.", Toast.LENGTH_SHORT).show();
+                    selectedCategories.remove(category); // Asegurar deselección
+                    Toast.makeText(this, getString(R.string.toast_package_deleted, category.getName()), Toast.LENGTH_SHORT).show();
                     reloadDataAndRefreshUI();
                 })
-                .setNegativeButton("CANCELAR", null)
+                .setNegativeButton(getString(R.string.dialog_delete_negative), null) // Usar String Resource
                 .show();
     }
 
@@ -215,30 +246,43 @@ public class SelectPackagesActivity extends AppCompatActivity
         createPackageLauncher.launch(intent);
     }
 
-    // --- Lógica del Activity Launcher ---
+    // --- Lógica del Activity Launcher (Corregida) ---
 
     private void setupActivityLauncher() {
+        // Usamos la constante de clave definida en CreatePackageActivity
+        final String RETURN_KEY = CreatePackageActivity.CATEGORY_RETURNED_KEY;
+
         createPackageLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
-                        // El paquete (ya sea nuevo o editado) debe guardarse en el DataBase en CreatePackageActivity.
+                        // 1. Recuperar la Categoria devuelta (nueva o editada)
+                        Categoria returnedCategory = (Categoria) result.getData()
+                                .getSerializableExtra(RETURN_KEY);
 
-                        // Si era una edición, debemos recargar los datos
-                        if (currentEditingCategory != null) {
-                            Toast.makeText(this, "Paquete editado y guardado.", Toast.LENGTH_SHORT).show();
-                            // currentEditingCategory ya apunta al objeto en selectedCategories/DB, solo refrescamos la lista
-                        } else {
-                            Toast.makeText(this, "Nuevo paquete creado y guardado.", Toast.LENGTH_SHORT).show();
-                            // Si es un paquete nuevo, asumimos que DataBase lo añade a su lista.
-                            // Si deseamos seleccionarlo automáticamente al crearlo:
-                            // Categoria newCat = // (Forma de obtener el nuevo paquete si el DB no lo retorna inmediatamente)
-                            // selectedCategories.add(newCat);
+                        if (returnedCategory == null) {
+                            Toast.makeText(this, getString(R.string.toast_error_retrieving_package), Toast.LENGTH_SHORT).show();
+                            return;
                         }
 
-                        // Recargamos y actualizamos la vista
+                        // 2. Si fue una CREACIÓN (currentEditingCategory == null), la seleccionamos automáticamente.
+                        if (currentEditingCategory == null) {
+                            if (!selectedCategories.contains(returnedCategory)) {
+                                selectedCategories.add(returnedCategory);
+                            }
+                            Toast.makeText(this, getString(R.string.toast_new_package_selected, returnedCategory.getName()), Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Es una EDICIÓN, solo notificamos
+                            Toast.makeText(this, getString(R.string.toast_package_edited, returnedCategory.getName()), Toast.LENGTH_SHORT).show();
+                        }
+
+                        // 3. Recargar la lista expandible
                         reloadDataAndRefreshUI();
                         currentEditingCategory = null;
+
+                    } else if (result.getResultCode() == Activity.RESULT_CANCELED) {
+                        // El usuario canceló o usó el back button.
+                        Toast.makeText(this, getString(R.string.toast_creation_cancelled), Toast.LENGTH_SHORT).show();
                     }
                 }
         );
@@ -252,7 +296,7 @@ public class SelectPackagesActivity extends AppCompatActivity
     private void updateConfirmButton() {
         int count = selectedCategories.size();
 
-        btnConfirmPackages.setText("Continuar (" + count + " Paquetes)");
+        btnConfirmPackages.setText(getString(R.string.btn_continue_packages, count));
 
         boolean enabled = count > 0;
         btnConfirmPackages.setEnabled(enabled);
@@ -264,15 +308,14 @@ public class SelectPackagesActivity extends AppCompatActivity
      */
     private void confirmSelection() {
         if (selectedCategories.isEmpty()) {
-            Toast.makeText(this, "Selecciona al menos un paquete.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.toast_select_at_least_one_package), Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Pasar la lista de categorías seleccionadas a la siguiente Activity
-        Intent intent = new Intent(SelectPackagesActivity.this, TimeSelectorActivity.class);
-        intent.putExtra("CATEGORIAS_SELECCIONADAS", (Serializable) selectedCategories);
-        startActivity(intent);
-
+        // Pasar la lista de categorías seleccionadas de vuelta a MainActivity
+        Intent intent = new Intent();
+        intent.putExtra(MainActivity.KEY_SELECTED_CATEGORIES, (Serializable) selectedCategories);
+        setResult(Activity.RESULT_OK, intent);
         finish();
     }
 }

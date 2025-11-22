@@ -25,11 +25,14 @@ import ies.carrillo.impostor.model.Categoria;
 public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
 
     private final Context context;
+    // groupNames se mantiene final porque la estructura del listado (cabeceras) es fija.
     private final List<String> groupNames;
-    private final HashMap<String, List<Categoria>> groupChildren;
-    private final List<Categoria> selectedCategories;
+    private final List<Categoria> selectedCategories; // Referencia directa a la lista de la Activity
     private final OnPackageActionListener listener;
     private final LayoutInflater layoutInflater;
+
+    // groupChildren es mutable y se actualiza en updateData.
+    private HashMap<String, List<Categoria>> groupChildren;
 
     private final String PACKAGE_CUSTOM_GROUP = "Personalizadas";
 
@@ -48,7 +51,7 @@ public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
                                      OnPackageActionListener listener) {
         this.context = context;
         this.groupNames = groupNames;
-        this.groupChildren = groupChildren;
+        this.groupChildren = groupChildren; // Asignamos la referencia mutable
         this.selectedCategories = selectedCategories;
         this.listener = listener;
         this.layoutInflater = LayoutInflater.from(context);
@@ -81,8 +84,10 @@ public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
     public int getChildrenCount(int groupPosition) {
         String groupName = groupNames.get(groupPosition);
         List<Categoria> children = groupChildren.get(groupName);
+
         if (groupName.equals(PACKAGE_CUSTOM_GROUP)) {
             // +1 para el botón de "Crear Nuevo"
+            // Se debe asegurar que children nunca sea null si el HashMap se inicializa correctamente.
             return children != null ? children.size() + 1 : 1;
         }
         return children != null ? children.size() : 0;
@@ -97,13 +102,19 @@ public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
         String groupName = groupNames.get(groupPosition);
         if (groupName.equals(PACKAGE_CUSTOM_GROUP)) {
             List<Categoria> customList = groupChildren.get(groupName);
+            // Comprobación de límites: Si childPosition es igual al tamaño, es el botón ADD_NEW.
             if (customList != null && childPosition < customList.size()) {
                 return customList.get(childPosition);
             }
-            return "ADD_NEW"; // Indicador especial
+            return "ADD_NEW"; // Indicador especial para el último hijo (el botón)
         }
-        // Retornar un objeto real del grupo si es necesario (aunque los predefinidos no tienen hijos visibles)
-        return Objects.requireNonNull(groupChildren.get(groupName)).get(childPosition);
+
+        // Para grupos predefinidos (aunque los hacemos no expandibles, la lógica existe)
+        List<Categoria> children = groupChildren.get(groupName);
+        if (children != null && childPosition < children.size()) {
+            return children.get(childPosition);
+        }
+        return null; // Debería ser unreachable si la lógica de getChildrenCount es correcta.
     }
 
     @Override public long getChildId(int groupPosition, int childPosition) { return childPosition; }
@@ -136,8 +147,8 @@ public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
             holder.imgExpand.setVisibility(View.VISIBLE);
             holder.imgExpand.setImageResource(isExpanded ? R.drawable.ic_arrow_up : R.drawable.ic_arrow_down);
 
-            int count = getChildrenCount(groupPosition) - 1;
-            holder.tvStatus.setText("Gestiona y selecciona tus " + count + " paquetes.");
+            int count = getChildrenCount(groupPosition) - 1; // El count real de paquetes
+            holder.tvStatus.setText(context.getString(R.string.status_custom_packages, count));
 
         } else { // Grupos predefinidos
             holder.cbSelect.setVisibility(View.VISIBLE);
@@ -150,8 +161,10 @@ public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
                     .anyMatch(cat -> cat.getName().equals(groupName));
             holder.cbSelect.setChecked(isChecked);
 
-            holder.tvStatus.setText(groupName.equals("Semana Santa") ? "Paquete predefinido de temas religiosos." :
-                    "Paquete predefinido de temas ambientales y biológicos.");
+            // Uso de String Resources para los estados
+            holder.tvStatus.setText(groupName.equals(context.getString(R.string.package_semana_santa)) ?
+                    context.getString(R.string.status_semana_santa) :
+                    context.getString(R.string.status_naturaleza));
 
             // Reasignar Listener
             holder.cbSelect.setOnClickListener(v -> {
@@ -168,14 +181,16 @@ public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
 
         // Si es la celda para crear un nuevo paquete
         if (groupName.equals(PACKAGE_CUSTOM_GROUP) && getChild(groupPosition, childPosition).equals("ADD_NEW")) {
+            // Se usa el mismo layout simple_list_item_1, pero se fuerza el TAG a String para no mezclar ViewHolders
             TextView btnAddNew = (TextView) layoutInflater.inflate(android.R.layout.simple_list_item_1, parent, false);
-            btnAddNew.setText("+ CREAR NUEVO PAQUETE PERSONALIZADO");
-            // Nota: Se asume que R.color.colorAccent existe en tu proyecto
+            btnAddNew.setText(R.string.btn_add_new_package_child);
+            // Se asume que R.color.colorAccent existe en tu proyecto (usando ContextCompat)
             btnAddNew.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
 
             // Convertir DP a PX para el padding
             float density = context.getResources().getDisplayMetrics().density;
             btnAddNew.setPadding((int) (32 * density), (int) (16 * density), (int) (16 * density), (int) (16 * density));
+            btnAddNew.setTag("ADD_NEW_VIEW"); // Tag para evitar que se reutilice con ChildViewHolder
 
             btnAddNew.setOnClickListener(v -> listener.onAddNewPackageClicked());
             return btnAddNew;
@@ -185,6 +200,7 @@ public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
         final Categoria category = (Categoria) getChild(groupPosition, childPosition);
         ChildViewHolder holder;
 
+        // Comprobación de que convertView no sea el del botón "ADD_NEW" antes de reutilizar
         if (convertView == null || convertView.getTag() instanceof String) {
             convertView = layoutInflater.inflate(R.layout.list_child_custom_package, parent, false);
             holder = new ChildViewHolder();
@@ -222,10 +238,19 @@ public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
         return true;
     }
 
-    // Método para actualizar los datos
+    /**
+     * Método para actualizar los datos (llamado desde SelectPackagesActivity).
+     */
     public void updateData(HashMap<String, List<Categoria>> newChildren) {
-        this.groupChildren.clear();
-        this.groupChildren.putAll(newChildren);
+        // Simplemente actualizamos la referencia del HashMap de hijos.
+        this.groupChildren = newChildren;
         notifyDataSetChanged();
+    }
+
+    /**
+     * Método auxiliar para que la Activity pueda encontrar la posición de un grupo.
+     */
+    public int getGroupPosition(String groupName) {
+        return groupNames.indexOf(groupName);
     }
 }

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Impostor</string>
     <string name="app_logo_description">Impostor</string>
-    <string name="civil">CIVIL</string>
+
 
 
     <string name="title_create_new_package">Crear Nuevo Paquete</string>
@@ -24,7 +24,32 @@
     <string name="toast_pair_deleted">Par \'%s\' eliminado del paquete.</string>
     <string name="toast_package_created">Paquete \'%s\' creado correctamente.</string>
     <string name="toast_package_updated">Paquete \'%s\' actualizado correctamente.</string>
-    <string name="impostor">IMPOSTOR</string>
+    <string name="package_semana_santa">Semana Santa</string>
+    <string name="package_naturaleza">Naturaleza</string>
 
+    <string name="status_custom_packages">Gestiona y selecciona tus %d paquetes.</string>
+    <string name="status_semana_santa">Paquete predefinido de temas religiosos.</string>
+    <string name="status_naturaleza">Paquete predefinido de temas ambientales y biológicos.</string>
+    <string name="btn_add_new_package_child">+ CREAR NUEVO PAQUETE PERSONALIZADO</string>
+    <string name="btn_continue_packages">Continuar (%d Paquetes)</string>
+
+    <string name="dialog_delete_title">Confirmar Borrado</string>
+    <string name="dialog_delete_message">¿Estás seguro de que deseas borrar permanentemente el paquete \'%s\'?</string>
+    <string name="dialog_delete_positive">BORRAR</string>
+    <string name="dialog_delete_negative">CANCELAR</string>
+
+    <string name="toast_select_at_least_one_package">Selecciona al menos un paquete.</string>
+    <string name="toast_error_retrieving_package">Error al recuperar el paquete.</string>
+    <string name="toast_new_package_selected">Paquete \'%s\' creado y seleccionado.</string>
+    <string name="toast_package_edited">Paquete \'%s\' editado y guardado.</string>
+    <string name="toast_creation_cancelled">Creación/Edición cancelada.</string>
+    <string name="toast_package_deleted">Paquete \'%s\' borrado.</string>
+    <string name="impostor">IMPOSTOR</string>
+    <string name="civil">CIVIL</string>
+    <string name="turn_of">Turno de %s</string>
+    <string name="btn_role_revealed">ROL REVELADO</string>
+
+    <string name="dialog_turn_change_title">¡CAMBIO DE TURNO!</string>
+    <string name="dialog_pass_device_to">Pasa el dispositivo a %s</string>
 
 </resources>

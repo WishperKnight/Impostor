@@ -3,6 +3,7 @@ package ies.carrillo.impostor.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -66,20 +67,29 @@ public class MainActivity extends AppCompatActivity {
         configurarNavegacion();
         configurarBotonInicio();
 
-        inicializarCategoriasDefault();
+        // **NOTA:** Mantener la inicialización del launcher para el caso de retorno.
+
         updateDisplays();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        // Aseguramos que la lista se inicialice solo si es necesario (si está totalmente vacía)
+        asegurarCategoriasSeleccionadas();
         updateDisplays();
     }
 
-    private void inicializarCategoriasDefault() {
-        if (categoriasSeleccionadas.isEmpty()) {
+    /**
+     * Asegura que haya categorías seleccionadas.
+     * Si la lista está vacía, se inicializan las categorías predefinidas.
+     */
+    private void asegurarCategoriasSeleccionadas() {
+        if (categoriasSeleccionadas == null || categoriasSeleccionadas.isEmpty()) {
             DataBase db = DataBase.getInstance();
-            // Selecciona las categorías predefinidas por defecto al iniciar
+            categoriasSeleccionadas = new ArrayList<>(); // Inicializar si era null
+
+            // Añadir categorías predefinidas
             categoriasSeleccionadas.add(db.getSemanaSanta());
             categoriasSeleccionadas.add(db.getNaturaleza());
         }
@@ -104,9 +114,14 @@ public class MainActivity extends AppCompatActivity {
                         Serializable categoriesExtra = data.getSerializableExtra(KEY_SELECTED_CATEGORIES);
 
                         if (categoriesExtra instanceof ArrayList) {
+                            // La lista recibida es la fuente de verdad.
                             categoriasSeleccionadas = (ArrayList<Categoria>) categoriesExtra;
                             updateDisplays();
                             Toast.makeText(this, categoriasSeleccionadas.size() + " paquetes seleccionados.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Si el resultado es OK pero la lista no está bien, la vaciamos.
+                            categoriasSeleccionadas = new ArrayList<>();
+                            updateDisplays();
                         }
                     }
                 }
@@ -118,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         Intent data = result.getData();
+                        // Se usa 300 como valor por defecto si no se encuentra el extra
                         duracionJuegoSegundos = data.getIntExtra(KEY_SELECTED_TIME, 300);
                         updateDisplays();
                         Toast.makeText(this, "Tiempo ajustado.", Toast.LENGTH_SHORT).show();
@@ -162,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
 
         btnSumar.setOnClickListener(v -> {
             int totalJugadores = DataBase.getInstance().getJugadores().size();
+            // Máximo: 2 impostores O (Total Jugadores - 1)
             if (numImpostores < MAX_IMPOSTORES && numImpostores < totalJugadores - 1) {
                 numImpostores++;
                 updateDisplays();
@@ -183,8 +200,13 @@ public class MainActivity extends AppCompatActivity {
         llJugadores.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, AddPlayersActivity.class)));
 
         LinearLayout llPaquetes = findViewById(R.id.ll_paquetes_config);
-        // Usamos el Launcher para obtener la lista seleccionada
-        llPaquetes.setOnClickListener(v -> packagesLauncher.launch(new Intent(MainActivity.this, SelectPackagesActivity.class)));
+        llPaquetes.setOnClickListener(v -> {
+            // CORRECCIÓN CRÍTICA: Enviamos la lista actual para que SelectPackagesActivity
+            // sepa qué está seleccionado por defecto (Semana Santa, Naturaleza).
+            Intent intent = new Intent(MainActivity.this, SelectPackagesActivity.class);
+            intent.putExtra(KEY_SELECTED_CATEGORIES, categoriasSeleccionadas);
+            packagesLauncher.launch(intent);
+        });
 
         LinearLayout llTiempo = findViewById(R.id.ll_tiempo_config);
         // Usamos el Launcher para obtener la duración
@@ -196,6 +218,9 @@ public class MainActivity extends AppCompatActivity {
         SwitchMaterial switchPistas = findViewById(R.id.switch_pistas);
 
         btnIniciarJuego.setOnClickListener(v -> {
+            // Asegurar que la lista no esté vacía antes de iniciar (rellena con default si es necesario)
+            asegurarCategoriasSeleccionadas();
+
             List<Jugador> jugadores = DataBase.getInstance().getJugadores();
             boolean pistasHabilitadas = switchPistas.isChecked();
 
@@ -215,16 +240,27 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            // 2. Asignar Roles
+            // Si la categoría seleccionada no tiene palabras, puede ser un error de la DB o
+            // un paquete personalizado mal creado.
+            if (categoriaSeleccionada.getPalabras() == null || categoriaSeleccionada.getPalabras().isEmpty()) {
+                Toast.makeText(this, "El paquete seleccionado (" + categoriaSeleccionada.getName() + ") no contiene palabras.", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            // 2. Seleccionar palabra/pista
+            categoriaSeleccionada.seleccionarPalabraAleatoria();
+
+            // 3. Asignar Roles
             GameLogic.assignRoles(jugadores, numImpostores);
 
-            // 3. Iniciar JuegoActivity
+            // 4. Iniciar JuegoActivity
             Intent intent = new Intent(MainActivity.this, JuegoActivity.class);
 
             intent.putExtra("CATEGORIA_SELECCIONADA", (Serializable) categoriaSeleccionada);
+            Log.i("Categoria en main",categoriaSeleccionada.getName());
             intent.putExtra("JUGADORES_CON_ROLES", (Serializable) jugadores);
             intent.putExtra("DURACION_SEGUNDOS", duracionJuegoSegundos);
-            intent.putExtra("PISTAS_HABILITADAS", pistasHabilitadas); // Corregido el typo
+            intent.putExtra("PISTAS_HABILITADAS", pistasHabilitadas);
 
             startActivity(intent);
         });
