@@ -1,6 +1,24 @@
 <resources>
-    <string name="app_name">Impostor</string>
-    <string name="app_logo_description">Impostor</string>
-    <string name="civil">CIVIL</string>
-    <string name="impostor">IMPOSTOR</string>
+    <string name="title_create_new_package">Crear Nuevo Paquete</string>
+    <string name="title_edit_package">Editar Paquete: %s</string>
+    <string name="hint_package_name">Nombre del Paquete</string>
+    <string name="hint_secret_word">Palabra Secreta (Civil)</string>
+    <string name="hint_impostor_clue">Pista (Impostor)</string>
+    <string name="header_add_new_pair">Añadir nuevo par Palabra / Pista</string>
+    <string name="header_existing_words">Palabras existentes en este paquete:</string>
+    <string name="btn_add_word">AÑADIR PALABRA AL PAQUETE</string>
+    <string name="btn_save_package">GUARDAR PAQUETE</string>
+    <string name="btn_save_changes">GUARDAR CAMBIOS</string>
+    <string name="text_empty_list">Aún no hay pares de palabras en este paquete.</string>
+
+    <string name="toast_word_clue_empty">Por favor, ingresa la Palabra Secreta y la Pista.</string>
+    <string name="toast_word_clue_equal">La Palabra Secreta y la Pista no pueden ser iguales.</string>
+    <string name="toast_package_name_empty">El nombre del paquete no puede estar vacío.</string>
+    <string name="toast_package_empty">El paquete debe contener al menos un par de Palabra/Pista.</string>
+    <string name="toast_pair_added">Par \'%s\' añadido al paquete.</string>
+    <string name="toast_pair_deleted">Par \'%s\' eliminado del paquete.</string>
+    <string name="toast_package_created">Paquete \'%s\' creado correctamente.</string>
+    <string name="toast_package_updated">Paquete \'%s\' actualizado correctamente.</string>
+    <string name="app_name">El Impostor</string>
+
 </resources>
