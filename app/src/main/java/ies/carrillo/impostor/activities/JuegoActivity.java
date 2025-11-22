@@ -146,7 +146,7 @@ public class JuegoActivity extends AppCompatActivity {
 
     private void revelarRol() {
         Jugador actual = jugadores.get(currentPlayerIndex);
-        Roles rolActual = actual.getRol(); // Obtenemos el Enum
+        Roles rolActual = Roles.valueOf(actual.getRole()); // Obtenemos el Enum
 
         // Ocultar la máscara
         imgMaskCover.setVisibility(View.GONE);

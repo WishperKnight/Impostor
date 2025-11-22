@@ -27,7 +27,7 @@ public class GameLogic {
         for (int i = 0; i < jugadores.size(); i++) {
             indices.add(i);
             // Establecer el rol por defecto (Tripulante/CIVIL)
-            jugadores.get(i).setRol(Roles.CIVIL); // ⬅️ CORRECCIÓN: Usar Roles.CIVIL
+            jugadores.get(i).setRole(String.valueOf(Roles.CIVIL)); // ⬅️ CORRECCIÓN: Usar Roles.CIVIL
         }
 
         // 2. Mezclar los índices para seleccionar aleatoriamente
@@ -37,7 +37,7 @@ public class GameLogic {
         // 3. Asignar el rol de 'Impostor' a los primeros 'numImpostores' índices
         for (int i = 0; i < numImpostores; i++) {
             int indiceImpostor = indices.get(i);
-            jugadores.get(indiceImpostor).setRol(Roles.IMPOSTOR); // ⬅️ CORRECCIÓN: Usar Roles.IMPOSTOR
+            jugadores.get(indiceImpostor).setRole(String.valueOf(Roles.IMPOSTOR)); // ⬅️ CORRECCIÓN: Usar Roles.IMPOSTOR
         }
 
         // 4. Retornar la lista con los roles asignados

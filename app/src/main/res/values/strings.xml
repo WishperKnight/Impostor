@@ -1,4 +1,9 @@
 <resources>
+    <string name="app_name">Impostor</string>
+    <string name="app_logo_description">Impostor</string>
+    <string name="civil">CIVIL</string>
+
+
     <string name="title_create_new_package">Crear Nuevo Paquete</string>
     <string name="title_edit_package">Editar Paquete: %s</string>
     <string name="hint_package_name">Nombre del Paquete</string>
@@ -19,6 +24,7 @@
     <string name="toast_pair_deleted">Par \'%s\' eliminado del paquete.</string>
     <string name="toast_package_created">Paquete \'%s\' creado correctamente.</string>
     <string name="toast_package_updated">Paquete \'%s\' actualizado correctamente.</string>
-    <string name="app_name">El Impostor</string>
+    <string name="impostor">IMPOSTOR</string>
+
 
 </resources>
