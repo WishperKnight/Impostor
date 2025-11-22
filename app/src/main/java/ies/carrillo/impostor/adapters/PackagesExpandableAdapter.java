@@ -9,39 +9,44 @@ import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import androidx.core.content.ContextCompat;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import ies.carrillo.impostor.R;
 import ies.carrillo.impostor.model.Categoria;
 
-/**
- * Adaptador para gestionar los paquetes (predefinidos y personalizados) en un ExpandableListView.
- */
 public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
 
     private final Context context;
-    // groupNames se mantiene final porque la estructura del listado (cabeceras) es fija.
-    private final List<String> groupNames;
-    private final List<Categoria> selectedCategories; // Referencia directa a la lista de la Activity
-    private final OnPackageActionListener listener;
-    private final LayoutInflater layoutInflater;
-
-    // groupChildren es mutable y se actualiza en updateData.
+    private List<String> groupNames;
     private HashMap<String, List<Categoria>> groupChildren;
+    private List<Categoria> selectedCategories; // Referencia a la lista de categorías seleccionadas
+    private OnPackageActionListener listener;
 
-    private final String PACKAGE_CUSTOM_GROUP = "Personalizadas";
+    // --- MAPA DE ICONOS ---
+    // Asociamos el nombre de la categoría/grupo con su ID de recurso (Drawable ID)
+    private static final Map<String, Integer> ICON_MAP = new HashMap<>();
 
-    // Interfaz de callback (se mantiene igual)
+    static {
+        // Asegúrate de que estos nombres coincidan exactamente con los de la DataBase
+        ICON_MAP.put("Semana Santa", R.drawable.semanasanta_icon);
+        ICON_MAP.put("Naturaleza", R.drawable.nature);
+        ICON_MAP.put("Personalizadas", R.drawable.category_custom);
+    }
+    // ----------------------
+
+    // Interfaz para manejar clics fuera del adaptador
     public interface OnPackageActionListener {
         void onGroupCheckboxToggled(String groupName, boolean isChecked);
+
         void onChildCheckboxToggled(Categoria category, boolean isChecked);
+
         void onEditPackageClicked(Categoria category);
+
         void onDeletePackageClicked(Categoria category);
+
         void onAddNewPackageClicked();
     }
 
@@ -51,29 +56,28 @@ public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
                                      OnPackageActionListener listener) {
         this.context = context;
         this.groupNames = groupNames;
-        this.groupChildren = groupChildren; // Asignamos la referencia mutable
+        this.groupChildren = groupChildren;
         this.selectedCategories = selectedCategories;
         this.listener = listener;
-        this.layoutInflater = LayoutInflater.from(context);
     }
 
-    // --- Patrón ViewHolder para Grupos (Headers) ---
-    static class GroupViewHolder {
-        TextView tvName;
-        TextView tvStatus;
-        CheckBox cbSelect;
-        ImageView imgExpand;
+    /**
+     * Permite actualizar la lista de hijos (necesario cuando se crea o elimina un paquete personalizado).
+     */
+    public void updateData(HashMap<String, List<Categoria>> newChildren) {
+        this.groupChildren = newChildren;
+        notifyDataSetChanged();
     }
 
-    // --- Patrón ViewHolder para Hijos (Custom Packages) ---
-    static class ChildViewHolder {
-        TextView tvName;
-        CheckBox cbSelect;
-        ImageButton btnEdit;
-        ImageButton btnDelete;
+    /**
+     * Método auxiliar para obtener la posición de un grupo por su nombre.
+     */
+    public int getGroupPosition(String groupName) {
+        return groupNames.indexOf(groupName);
     }
 
-    // --- Métodos de Data ---
+
+    // --- BASE EXPANDABLE ADAPTER IMPLEMENTATION ---
 
     @Override
     public int getGroupCount() {
@@ -85,149 +89,135 @@ public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
         String groupName = groupNames.get(groupPosition);
         List<Categoria> children = groupChildren.get(groupName);
 
-        if (groupName.equals(PACKAGE_CUSTOM_GROUP)) {
-            // +1 para el botón de "Crear Nuevo"
-            // Se debe asegurar que children nunca sea null si el HashMap se inicializa correctamente.
-            return children != null ? children.size() + 1 : 1;
+        // Si es el grupo "Personalizadas", añadimos 1 extra para el botón de "Crear Nuevo Paquete"
+        if ("Personalizadas".equals(groupName)) {
+            return (children != null ? children.size() : 0) + 1;
         }
-        return children != null ? children.size() : 0;
+
+        // Los grupos predefinidos no tienen hijos visibles
+        return 0;
     }
 
-    @Override public Object getGroup(int groupPosition) { return groupNames.get(groupPosition); }
-    @Override public long getGroupId(int groupPosition) { return groupPosition; }
-    @Override public boolean hasStableIds() { return false; }
+    @Override
+    public Object getGroup(int groupPosition) {
+        return groupNames.get(groupPosition);
+    }
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
         String groupName = groupNames.get(groupPosition);
-        if (groupName.equals(PACKAGE_CUSTOM_GROUP)) {
-            List<Categoria> customList = groupChildren.get(groupName);
-            // Comprobación de límites: Si childPosition es igual al tamaño, es el botón ADD_NEW.
-            if (customList != null && childPosition < customList.size()) {
-                return customList.get(childPosition);
-            }
-            return "ADD_NEW"; // Indicador especial para el último hijo (el botón)
-        }
-
-        // Para grupos predefinidos (aunque los hacemos no expandibles, la lógica existe)
         List<Categoria> children = groupChildren.get(groupName);
-        if (children != null && childPosition < children.size()) {
+
+        if ("Personalizadas".equals(groupName) && childPosition < (children != null ? children.size() : 0)) {
             return children.get(childPosition);
         }
-        return null; // Debería ser unreachable si la lógica de getChildrenCount es correcta.
+        return null; // El último elemento es el botón de 'Añadir nuevo'
     }
 
-    @Override public long getChildId(int groupPosition, int childPosition) { return childPosition; }
+    @Override
+    public long getGroupId(int groupPosition) {
+        return groupPosition;
+    }
 
+    @Override
+    public long getChildId(int groupPosition, int childPosition) {
+        return childPosition;
+    }
 
-    // --- Métodos de Vista (Renderizado) OPTIMIZADOS ---
+    @Override
+    public boolean hasStableIds() {
+        return false;
+    }
+
+    // --- GRUPO VIEW (CATEGORÍA PREDEFINIDA O GRUPO PERSONALIZADO) ---
 
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        GroupViewHolder holder;
-        String groupName = (String) getGroup(groupPosition);
-
         if (convertView == null) {
-            convertView = layoutInflater.inflate(R.layout.list_group_package, parent, false);
-            holder = new GroupViewHolder();
-            holder.tvName = convertView.findViewById(R.id.tv_package_name);
-            holder.tvStatus = convertView.findViewById(R.id.tv_package_status);
-            holder.cbSelect = convertView.findViewById(R.id.cb_package_select);
-            holder.imgExpand = convertView.findViewById(R.id.img_expand_indicator);
-            convertView.setTag(holder);
-        } else {
-            holder = (GroupViewHolder) convertView.getTag();
+            convertView = LayoutInflater.from(context).inflate(R.layout.list_group_package, parent, false);
         }
 
-        holder.tvName.setText(groupName);
+        final String groupName = (String) getGroup(groupPosition);
 
-        // Lógica específica para el grupo de Personalizadas
-        if (groupName.equals(PACKAGE_CUSTOM_GROUP)) {
-            holder.cbSelect.setVisibility(View.GONE);
-            holder.imgExpand.setVisibility(View.VISIBLE);
-            holder.imgExpand.setImageResource(isExpanded ? R.drawable.ic_arrow_up : R.drawable.ic_arrow_down);
+        TextView tvGroupName = convertView.findViewById(R.id.tv_package_name);
+        CheckBox cbGroupCheck = convertView.findViewById(R.id.cb_package_select);
+        ImageView ivGroupIcon = convertView.findViewById(R.id.img_package_icon);
 
-            int count = getChildrenCount(groupPosition) - 1; // El count real de paquetes
-            holder.tvStatus.setText(context.getString(R.string.status_custom_packages, count));
+        tvGroupName.setText(groupName);
 
-        } else { // Grupos predefinidos
-            holder.cbSelect.setVisibility(View.VISIBLE);
-            holder.imgExpand.setVisibility(View.GONE);
+        // 1. Lógica de Iconos
+        if (ICON_MAP.containsKey(groupName)) {
+            ivGroupIcon.setVisibility(View.VISIBLE);
+            ivGroupIcon.setImageResource(ICON_MAP.get(groupName));
+        } else {
+            ivGroupIcon.setVisibility(View.GONE);
+        }
 
-            // Desactivar listener antes de setear el estado
-            holder.cbSelect.setOnClickListener(null);
+        // 2. Lógica de Checkbox
+        if ("Personalizadas".equals(groupName)) {
+            // El grupo 'Personalizadas' no es seleccionable.
+            cbGroupCheck.setVisibility(View.GONE);
+        } else {
+            // Grupos Predefinidos (Semana Santa, Naturaleza) son seleccionables.
+            cbGroupCheck.setVisibility(View.VISIBLE);
 
+            // Comprobamos si la categoría predefinida está seleccionada en la lista principal
             boolean isChecked = selectedCategories.stream()
-                    .anyMatch(cat -> cat.getName().equals(groupName));
-            holder.cbSelect.setChecked(isChecked);
+                    .anyMatch(c -> c.getName().equals(groupName));
+            cbGroupCheck.setChecked(isChecked);
 
-            // Uso de String Resources para los estados
-            holder.tvStatus.setText(groupName.equals(context.getString(R.string.package_semana_santa)) ?
-                    context.getString(R.string.status_semana_santa) :
-                    context.getString(R.string.status_naturaleza));
-
-            // Reasignar Listener
-            holder.cbSelect.setOnClickListener(v -> {
-                listener.onGroupCheckboxToggled(groupName, holder.cbSelect.isChecked());
+            cbGroupCheck.setOnClickListener(v -> {
+                listener.onGroupCheckboxToggled(groupName, cbGroupCheck.isChecked());
             });
         }
 
         return convertView;
     }
 
+    // --- CHILD VIEW (PAQUETE PERSONALIZADO INDIVIDUAL O BOTÓN AÑADIR) ---
+
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-        String groupName = groupNames.get(groupPosition);
+        final String groupName = (String) getGroup(groupPosition);
 
-        // Si es la celda para crear un nuevo paquete
-        if (groupName.equals(PACKAGE_CUSTOM_GROUP) && getChild(groupPosition, childPosition).equals("ADD_NEW")) {
-            // Se usa el mismo layout simple_list_item_1, pero se fuerza el TAG a String para no mezclar ViewHolders
-            TextView btnAddNew = (TextView) layoutInflater.inflate(android.R.layout.simple_list_item_1, parent, false);
-            btnAddNew.setText(R.string.btn_add_new_package_child);
-            // Se asume que R.color.colorAccent existe en tu proyecto (usando ContextCompat)
-            btnAddNew.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+        // El último elemento del grupo "Personalizadas" es el botón de añadir nuevo.
+        if ("Personalizadas".equals(groupName) && childPosition == getChildrenCount(groupPosition) - 1) {
 
-            // Convertir DP a PX para el padding
-            float density = context.getResources().getDisplayMetrics().density;
-            btnAddNew.setPadding((int) (32 * density), (int) (16 * density), (int) (16 * density), (int) (16 * density));
-            btnAddNew.setTag("ADD_NEW_VIEW"); // Tag para evitar que se reutilice con ChildViewHolder
+            // Inflar la vista del botón de añadir
+            convertView = LayoutInflater.from(context).inflate(R.layout.list_child_add_package, parent, false);
 
-            btnAddNew.setOnClickListener(v -> listener.onAddNewPackageClicked());
-            return btnAddNew;
+            convertView.setOnClickListener(v -> listener.onAddNewPackageClicked());
+
+            return convertView;
         }
 
-        // Es un paquete personalizado real
+        // Los otros elementos son categorías personalizadas
         final Categoria category = (Categoria) getChild(groupPosition, childPosition);
-        ChildViewHolder holder;
 
-        // Comprobación de que convertView no sea el del botón "ADD_NEW" antes de reutilizar
-        if (convertView == null || convertView.getTag() instanceof String) {
-            convertView = layoutInflater.inflate(R.layout.list_child_custom_package, parent, false);
-            holder = new ChildViewHolder();
-            holder.tvName = convertView.findViewById(R.id.tv_child_package_name);
-            holder.cbSelect = convertView.findViewById(R.id.cb_child_select);
+        if (convertView == null || convertView.getTag() == null || !(convertView.getTag() instanceof ViewHolder)) {
+            convertView = LayoutInflater.from(context).inflate(R.layout.list_child_custom_package, parent, false);
+            ViewHolder holder = new ViewHolder();
+            holder.tvChildName = convertView.findViewById(R.id.tv_child_package_name);
+            holder.cbChildCheck = convertView.findViewById(R.id.cb_child_select);
             holder.btnEdit = convertView.findViewById(R.id.btn_edit_package);
             holder.btnDelete = convertView.findViewById(R.id.btn_delete_package);
             convertView.setTag(holder);
-        } else {
-            holder = (ChildViewHolder) convertView.getTag();
         }
 
-        holder.tvName.setText(category.getName());
+        final ViewHolder holder = (ViewHolder) convertView.getTag();
 
-        // 1. Estado de Selección
-        holder.cbSelect.setOnClickListener(null);
+        holder.tvChildName.setText(category.getName());
+
+        // Lógica de Checkbox (selección)
         boolean isChecked = selectedCategories.contains(category);
-        holder.cbSelect.setChecked(isChecked);
+        holder.cbChildCheck.setChecked(isChecked);
 
-        holder.cbSelect.setOnClickListener(v -> {
-            listener.onChildCheckboxToggled(category, holder.cbSelect.isChecked());
+        holder.cbChildCheck.setOnClickListener(v -> {
+            listener.onChildCheckboxToggled(category, holder.cbChildCheck.isChecked());
         });
 
-        // 2. Botón Editar
+        // Lógica de Botones de Acción
         holder.btnEdit.setOnClickListener(v -> listener.onEditPackageClicked(category));
-
-        // 3. Botón Borrar
         holder.btnDelete.setOnClickListener(v -> listener.onDeletePackageClicked(category));
 
         return convertView;
@@ -238,19 +228,11 @@ public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
         return true;
     }
 
-    /**
-     * Método para actualizar los datos (llamado desde SelectPackagesActivity).
-     */
-    public void updateData(HashMap<String, List<Categoria>> newChildren) {
-        // Simplemente actualizamos la referencia del HashMap de hijos.
-        this.groupChildren = newChildren;
-        notifyDataSetChanged();
-    }
-
-    /**
-     * Método auxiliar para que la Activity pueda encontrar la posición de un grupo.
-     */
-    public int getGroupPosition(String groupName) {
-        return groupNames.indexOf(groupName);
+    // Patrón ViewHolder para optimizar la carga de vistas hijo
+    private static class ViewHolder {
+        TextView tvChildName;
+        CheckBox cbChildCheck;
+        ImageButton btnEdit;
+        ImageButton btnDelete;
     }
 }
