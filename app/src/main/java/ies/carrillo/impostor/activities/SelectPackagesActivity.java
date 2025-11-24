@@ -108,9 +108,13 @@ public class SelectPackagesActivity extends AppCompatActivity
 
     private void setupExpandableList() {
         // Nombres de los Grupos (Orden Fijo: Predefinidas y Personalizadas)
+        // MODIFICACIÓN 1: Incluir los nombres de las 3 categorías nuevas
         List<String> groupNames = Arrays.asList(
                 DataBase.getInstance().getSemanaSanta().getName(), // "Semana Santa"
                 DataBase.getInstance().getNaturaleza().getName(),  // "Naturaleza"
+                DataBase.getInstance().getVideojuegos().getName(), // "Videojuegos"
+                DataBase.getInstance().getCineTv().getName(),      // "Cine y TV"
+                DataBase.getInstance().getComida().getName(),      // "Comida"
                 PACKAGE_CUSTOM_GROUP
         );
 
@@ -142,6 +146,12 @@ public class SelectPackagesActivity extends AppCompatActivity
         // 1. Paquetes predefinidos (gestionados directamente en el GroupView)
         data.put(db.getSemanaSanta().getName(), new ArrayList<>());
         data.put(db.getNaturaleza().getName(), new ArrayList<>());
+
+        // MODIFICACIÓN 2: Añadir las nuevas categorías al mapa de datos
+        data.put(db.getVideojuegos().getName(), new ArrayList<>());
+        data.put(db.getCineTv().getName(), new ArrayList<>());
+        data.put(db.getComida().getName(), new ArrayList<>());
+
 
         // 2. Paquetes personalizados (los hijos son las categorías personalizadas)
         data.put(PACKAGE_CUSTOM_GROUP, db.getCustomCategories());
@@ -187,6 +197,9 @@ public class SelectPackagesActivity extends AppCompatActivity
     public void onGroupCheckboxToggled(String groupName, boolean isChecked) {
         DataBase db = DataBase.getInstance();
         // Buscar categoría predefinida
+        // NOTA: Se ha simplificado la forma de buscar en el DataBase en la versión anterior.
+        // Si tienes un método `getCategorias()` que devuelve todas las predefinidas,
+        // esto funcionará correctamente con las nuevas categorías añadidas.
         Categoria category = db.getCategorias().stream()
                 .filter(cat -> cat.getName().equals(groupName))
                 .findFirst().orElse(null);

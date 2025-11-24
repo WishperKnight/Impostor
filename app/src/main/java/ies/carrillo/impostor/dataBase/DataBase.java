@@ -33,13 +33,18 @@ public class DataBase {
     private Categoria semanaSanta;
     private Categoria naturaleza;
 
+    // --- NUEVAS CATEGORÍAS ---
+    private Categoria videojuegos;
+    private Categoria cineTv;
+    private Categoria comida;
+
     // Constructor privado para forzar el uso de getInstance()
     private DataBase() {
         inicializarCategorias();
     }
 
     private void inicializarCategorias() {
-        // --- 1. Crear el objeto Semana Santa ---
+        // --- 1. Crear el objeto Semana Santa (EXISTENTE) ---
         HashMap<String, String> palabrasSemanaSanta = new HashMap<>();
         palabrasSemanaSanta.put("Nazareno", "Capirotes");
         palabrasSemanaSanta.put("Trono", "Costaleros");
@@ -57,7 +62,7 @@ public class DataBase {
                 palabrasSemanaSanta
         );
 
-        // --- 2. Crear el objeto Naturaleza ---
+        // --- 2. Crear el objeto Naturaleza (EXISTENTE) ---
         HashMap<String, String> palabrasNaturaleza = new HashMap<>();
         palabrasNaturaleza.put("Fotosíntesis", "Clorofila");
         palabrasNaturaleza.put("Ecosistema", "Habitat");
@@ -75,12 +80,69 @@ public class DataBase {
                 palabrasNaturaleza
         );
 
-        // --- 3. Añadir las categorías predefinidas a su lista ---
+        // --- 3. Crear el objeto Videojuegos (NUEVA) ---
+        HashMap<String, String> palabrasVideojuegos = new HashMap<>();
+        palabrasVideojuegos.put("Multijugador", "Servidor");
+        palabrasVideojuegos.put("Consola", "Mando");
+        palabrasVideojuegos.put("Gráficos", "Renderizado");
+        palabrasVideojuegos.put("Personaje", "Avatar");
+        palabrasVideojuegos.put("Misión", "Objetivo");
+        palabrasVideojuegos.put("Aventura", "Exploración");
+        palabrasVideojuegos.put("E-Sports", "Torneo");
+        palabrasVideojuegos.put("Realidad Virtual", "Gafas");
+        palabrasVideojuegos.put("Indie", "Desarrollador");
+        palabrasVideojuegos.put("Mapa", "Navegación");
+
+        videojuegos = new Categoria(
+                "Videojuegos",
+                palabrasVideojuegos
+        );
+
+        // --- 4. Crear el objeto Cine y TV (NUEVA) ---
+        HashMap<String, String> palabrasCineTv = new HashMap<>();
+        palabrasCineTv.put("Director", "Cámara");
+        palabrasCineTv.put("Guion", "Diálogo");
+        palabrasCineTv.put("Estreno", "Cartelera");
+        palabrasCineTv.put("Secuela", "Original");
+        palabrasCineTv.put("Teatro", "Escenario");
+        palabrasCineTv.put("Streaming", "Plataforma");
+        palabrasCineTv.put("Óscar", "Estatua");
+        palabrasCineTv.put("Banda Sonora", "Música");
+        palabrasCineTv.put("Efectos Especiales", "CGI");
+        palabrasCineTv.put("Documental", "Realidad");
+
+        cineTv = new Categoria(
+                "Cine y TV",
+                palabrasCineTv
+        );
+
+        // --- 5. Crear el objeto Comida (NUEVA) ---
+        HashMap<String, String> palabrasComida = new HashMap<>();
+        palabrasComida.put("Chef", "Receta");
+        palabrasComida.put("Ingrediente", "Sabor");
+        palabrasComida.put("Vegetariano", "Verdura");
+        palabrasComida.put("Especias", "Aroma");
+        palabrasComida.put("Desayuno", "Mañana");
+        palabrasComida.put("Postre", "Dulce");
+        palabrasComida.put("Cena", "Noche");
+        palabrasComida.put("Marinado", "Carne");
+        palabrasComida.put("Alérgeno", "Riesgo");
+        palabrasComida.put("Dieta", "Salud");
+
+        comida = new Categoria(
+                "Comida",
+                palabrasComida
+        );
+
+        // --- 6. Añadir TODAS las categorías predefinidas a su lista ---
         predefinidas.add(semanaSanta);
         predefinidas.add(naturaleza);
+        predefinidas.add(videojuegos); // NUEVO
+        predefinidas.add(cineTv);      // NUEVO
+        predefinidas.add(comida);      // NUEVO
     }
 
-    // --- MÉTODOS DE JUGADORES ---
+    // --- MÉTODOS DE JUGADORES (SIN CAMBIOS) ---
 
     public ArrayList<Jugador> getJugadores() {
         return jugadores;
@@ -105,7 +167,21 @@ public class DataBase {
         return naturaleza;
     }
 
-    // --- MÉTODOS PARA CATEGORÍAS PERSONALIZADAS MÚLTIPLES ---
+    // --- NUEVOS GETTERS ESPECÍFICOS ---
+
+    public Categoria getVideojuegos() {
+        return videojuegos;
+    }
+
+    public Categoria getCineTv() {
+        return cineTv;
+    }
+
+    public Categoria getComida() {
+        return comida;
+    }
+
+    // --- MÉTODOS PARA CATEGORÍAS PERSONALIZADAS MÚLTIPLES (SIN CAMBIOS) ---
 
     public List<Categoria> getCustomCategories() {
         return customCategories;

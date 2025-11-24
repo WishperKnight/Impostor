@@ -5,7 +5,6 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_light"
     tools:context=".activities.CreatePackageActivity">
 
     <TextView
@@ -15,7 +14,6 @@
         tools:text="Editar Paquete: Deportes"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:textColor="@color/text_primary"
         android:padding="16dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -113,7 +111,6 @@
                 android:text="Palabras existentes en este paquete:"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@color/text_primary"
                 android:layout_marginBottom="16dp"/>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -132,7 +129,6 @@
                 android:layout_height="wrap_content"
                 android:text="Aún no hay pares de palabras en este paquete."
                 android:textSize="16sp"
-                android:textColor="@color/text_secondary"
                 android:gravity="center"
                 android:padding="16dp"
                 android:visibility="gone"

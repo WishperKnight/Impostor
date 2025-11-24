@@ -45,8 +45,35 @@ public class AddPlayersActivity extends AppCompatActivity implements PlayersAdap
     private final int MAX_PLAYERS = 10;
 
     private final List<String> availableColors = Arrays.asList(
-            "#FF0000", "#008000", "#0000FF", "#FFFF00", "#FFA500",
-            "#800080", "#00FFFF", "#FFC0CB", "#A52A2A", "#FFFFFF"
+            // 1. 🟥 ROJO
+            "#FFB6C1", // Rosa Salmón (Light Coral)
+
+            // 2. 🟩 VERDE
+            "#90EE90", // Verde Menta (Light Green)
+
+            // 3. 🟦 AZUL
+            "#ADD8E6", // Azul Claro (Light Blue)
+
+            // 4. 🟨 AMARILLO
+            "#FFFACD", // Amarillo Pálido (Lemon Chiffon)
+
+            // 5. 🟧 NARANJA
+            "#FFDAB9", // Melocotón (Peach)
+
+            // 6. 🟪 MORADO
+            "#CBA3D3", // Lila Suave (Mauve)
+
+            // 7. 🟦 CIAN
+            "#AFEEEE", // Turquesa Pálido (Pale Turquoise)
+
+            // 8. 💖 ROSA
+            "#FFD1DC", // Rosa Bebé (Pink)
+
+            // 9. 🟫 MARRÓN
+            "#B8860B", // Marrón Dorado Suave (Dark Goldenrod, visible)
+
+            // 10. ⬜ BLANCO / NEUTRO
+            "#A9A9A9"  // Gris Oscuro Suave (Dark Gray, visible en fondo blanco)
     );
 
     // Nombres descriptivos para los colores (para el diálogo)

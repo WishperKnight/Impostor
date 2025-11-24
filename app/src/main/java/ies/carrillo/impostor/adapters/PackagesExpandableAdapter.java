@@ -25,15 +25,23 @@ public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
     private List<Categoria> selectedCategories; // Referencia a la lista de categorías seleccionadas
     private OnPackageActionListener listener;
 
-    // --- MAPA DE ICONOS ---
+    // --- MAPA DE ICONOS CORREGIDO Y AMPLIADO ---
     // Asociamos el nombre de la categoría/grupo con su ID de recurso (Drawable ID)
     private static final Map<String, Integer> ICON_MAP = new HashMap<>();
 
     static {
         // Asegúrate de que estos nombres coincidan exactamente con los de la DataBase
-        ICON_MAP.put("Semana Santa", R.drawable.semanasanta_icon);
-        ICON_MAP.put("Naturaleza", R.drawable.nature);
-        ICON_MAP.put("Personalizadas", R.drawable.category_custom);
+        ICON_MAP.put("Semana Santa", R.mipmap.ic_semana_santa);
+        ICON_MAP.put("Naturaleza", R.mipmap.ic_nature);
+
+        // --- CATEGORÍAS AÑADIDAS ---
+        // Debes asegurar que los recursos (R.drawable.ic_videogames, etc.) existen.
+        ICON_MAP.put("Videojuegos", R.mipmap.ic_videogames); // Asumiendo este ID
+        ICON_MAP.put("Cine y TV", R.mipmap.ic_cinema_and_tv);       // Asumiendo este ID
+        ICON_MAP.put("Comida", R.mipmap.ic_food);           // Asumiendo este ID
+        // ---------------------------
+
+        ICON_MAP.put("Personalizadas", R.mipmap.ic_custom_category);
     }
     // ----------------------
 
@@ -150,6 +158,7 @@ public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
             ivGroupIcon.setVisibility(View.VISIBLE);
             ivGroupIcon.setImageResource(ICON_MAP.get(groupName));
         } else {
+            // Aseguramos que si no hay un ícono, no se vea un espacio vacío o un ícono roto.
             ivGroupIcon.setVisibility(View.GONE);
         }
 
@@ -158,7 +167,7 @@ public class PackagesExpandableAdapter extends BaseExpandableListAdapter {
             // El grupo 'Personalizadas' no es seleccionable.
             cbGroupCheck.setVisibility(View.GONE);
         } else {
-            // Grupos Predefinidos (Semana Santa, Naturaleza) son seleccionables.
+            // Grupos Predefinidos (incluyendo los nuevos) son seleccionables.
             cbGroupCheck.setVisibility(View.VISIBLE);
 
             // Comprobamos si la categoría predefinida está seleccionada en la lista principal

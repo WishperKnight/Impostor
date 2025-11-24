@@ -13,7 +13,6 @@
         android:layout_height="wrap_content"
         android:text="Civil:"
         android:textStyle="bold"
-        android:textColor="@color/text_primary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -22,7 +21,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         tools:text="PALABRA SECRETA"
-        android:textColor="@color/text_primary"
         android:layout_marginStart="8dp"
         android:ellipsize="end"
         android:maxLines="1"
@@ -46,7 +44,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         tools:text="PISTA RELACIONADA"
-        android:textColor="@color/text_secondary"
         android:layout_marginStart="8dp"
         android:ellipsize="end"
         android:maxLines="1"
