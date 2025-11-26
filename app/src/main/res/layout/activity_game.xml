@@ -5,55 +5,54 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_dark"
     tools:context=".activities.JuegoActivity">
 
-    <!-- Nombre del Jugador Actual -->
     <TextView
         android:id="@+id/tv_current_player_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="56dp"
         android:gravity="center"
-        android:textColor="@color/white"
-        android:textSize="28sp"
+        android:textColor="@color/text_primary"
+        android:textSize="26sp"
         android:textStyle="bold"
-        tools:text="Turno de ANA"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Turno de ANA" />
 
-    <!-- Tarjeta Central de Revelación -->
     <androidx.cardview.widget.CardView
         android:id="@+id/card_revelation"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="350dp"
         android:layout_marginHorizontal="24dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="10dp"
-        android:layout_marginTop="48dp"
-        app:layout_constraintTop_toBottomOf="@id/tv_current_player_name"
+        android:layout_marginTop="40dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/tv_current_player_name">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_reveal_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="32dp"
-            android:gravity="center">
+            android:layout_height="match_parent">
 
-            <!-- Contenedor del contenido que se oculta -->
             <LinearLayout
                 android:id="@+id/ll_role_content"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:layout_height="match_parent"
                 android:gravity="center"
-                android:visibility="gone"
+                android:orientation="vertical"
+                android:padding="32dp"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 tools:visibility="visible">
 
-                <!-- Rol -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -65,91 +64,109 @@
                     android:id="@+id/tv_player_role"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:textSize="36sp"
-                    android:textStyle="bold"
+                    android:layout_marginBottom="24dp"
                     android:textColor="@color/colorPrimary"
+                    android:textSize="48sp"
+                    android:textStyle="bold"
                     tools:text="IMPOSTOR" />
 
                 <View
-                    android:layout_width="150dp"
-                    android:layout_height="2dp"
-                    android:background="@color/divider_color"
-                    android:layout_marginBottom="16dp" />
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="32dp"
+                    android:layout_marginBottom="24dp"
+                    android:background="@color/divider_color" />
 
-                <!-- Palabra (o Pista si es Impostor) -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="LA PALABRA CLAVE ES:"
                     android:textColor="@color/text_secondary"
-                    android:textSize="20sp" />
+                    android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/tv_player_word"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/text_primary"
                     android:textSize="32sp"
                     android:textStyle="bold"
-                    android:textColor="@color/text_primary"
                     tools:text="PROCESIÓN" />
 
             </LinearLayout>
 
-            <!-- Imagen/Placeholder Oculto (Se muestra al inicio) -->
             <ImageView
                 android:id="@+id/img_mask_cover"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                app:srcCompat="@drawable/impostor_loading_roles"
-                android:contentDescription="Ocultar Rol"
-                android:visibility="visible" />
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="Máscara de Rol"
+                android:scaleType="centerCrop"
+                android:src="@drawable/impostor_loading_roles"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/tv_instruction"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Pulsa el botón de abajo para ver tu rol y palabra."
-                android:layout_marginTop="16dp"
+                android:layout_marginHorizontal="48dp"
+                android:layout_marginTop="32dp"
                 android:gravity="center"
-                android:textColor="@color/text_secondary"
-                android:textSize="16sp" />
+                android:text="Pulsa 'REVELAR' para deslizar la tarjeta y ver tu rol."
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="@id/img_mask_cover"
+                app:layout_constraintStart_toStartOf="@id/img_mask_cover"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        </LinearLayout>
+            <ImageView
+                android:id="@+id/img_lock_icon"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:alpha="0.8"
+                app:layout_constraintBottom_toBottomOf="@id/img_mask_cover"
+                app:layout_constraintEnd_toEndOf="@id/img_mask_cover"
+                app:layout_constraintStart_toStartOf="@id/img_mask_cover"
+                app:layout_constraintTop_toTopOf="@id/img_mask_cover"
+                app:srcCompat="@drawable/ic_lock_closed"
+                app:tint="@android:color/white" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Botón de Acción Principal (Revelar / Entendido) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_action"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="40dp"
+        android:paddingVertical="16dp"
         android:text="REVELAR ROL Y PALABRA"
         android:textSize="20sp"
-        android:paddingTop="14dp"
-        android:paddingBottom="14dp"
-        app:cornerRadius="12dp"
-        app:layout_constraintTop_toBottomOf="@id/card_revelation"
-        app:layout_constraintStart_toStartOf="parent"
+        app:backgroundTint="@color/colorPrimary"
+        app:cornerRadius="16dp"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="32dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card_revelation" />
 
-    <!-- Botón de Siguiente Jugador (Oculto al inicio) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_next_player"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:text="SIGUIENTE JUGADOR"
-        android:textSize="20sp"
-        android:paddingTop="14dp"
-        android:paddingBottom="14dp"
-        app:cornerRadius="12dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginBottom="32dp"
+        android:paddingVertical="14dp"
+        android:text="LISTO: PASAR AL SIGUIENTE JUGADOR"
+        android:textSize="18sp"
         android:visibility="gone"
         app:backgroundTint="@color/colorVibrantOrange"
+        app:cornerRadius="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="24dp" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,6 +5,7 @@
 
     <color name="colorPrimary">#5733FF</color>         <color name="colorPrimaryDark">#4025B2</color>
     <color name="colorAccent">#FF5733</color>          <color name="colorVibrantOrange">#FF5733</color>
+    <color name="role_impostor">#FF5733</color>
     <color name="colorFuchsiaElectric">#FF33A1</color>
     <color name="colorCyanBright">#33FFCE</color>
     <color name="colorDeepPurple">#5733FF</color>

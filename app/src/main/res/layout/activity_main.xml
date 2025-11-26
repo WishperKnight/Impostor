@@ -7,32 +7,43 @@
     android:padding="16dp"
     tools:context=".activities.MainActivity">
 
+    <ImageView
+        android:id="@+id/iv_app_icon"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="32dp"
+        android:contentDescription="Icono de la aplicación Impostor"
+        android:src="@drawable/ic_launcher"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/tv_app_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:fontFamily="sans-serif-black"
+        android:letterSpacing="0.05"
         android:text="IMPOSTOR"
+        android:textColor="@color/colorPrimary"
         android:textSize="42sp"
         android:textStyle="bold"
-        android:fontFamily="sans-serif-black"
-        android:textColor="@color/colorPrimary"
-        android:letterSpacing="0.05"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/iv_app_icon" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_configuracion_basica"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         app:cardCornerRadius="12dp"
         app:cardElevation="6dp"
-        app:layout_constraintTop_toBottomOf="@id/tv_app_title"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_app_title">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -43,46 +54,47 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:text="Ajustes de la Partida"
                 android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp" />
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:id="@+id/ll_jugadores_config"
                 style="@style/ConfigRowStyle"
+                android:background="?attr/selectableItemBackground"
                 android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackground">
+                android:focusable="true">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_person"
                     android:contentDescription="Icono de Jugadores"
+                    android:src="@drawable/ic_person"
                     app:tint="@color/icon_person" />
 
                 <TextView
+                    android:id="@+id/tv_jugadores"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_weight="1"
                     android:text="Jugadores"
-                    android:textSize="16sp"
-                    android:layout_marginStart="16dp" />
+                    android:textSize="16sp" />
 
                 <TextView
                     android:id="@+id/tv_num_jugadores"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="6"
+                    android:text="0"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_arrow_forward"
                     android:contentDescription="Ir a configuración"
+                    android:src="@drawable/ic_arrow_forward"
                     app:tint="@color/divider_color" />
             </LinearLayout>
 
@@ -91,50 +103,50 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:paddingVertical="12dp">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_impostor_mask"
                     android:contentDescription="Icono de Impostor"
+                    android:src="@drawable/ic_impostor_mask"
                     app:tint="@color/icon_impostor" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_weight="1"
                     android:text="Número de Impostores"
-                    android:textSize="16sp"
-                    android:layout_marginStart="16dp" />
+                    android:textSize="16sp" />
 
                 <ImageButton
                     android:id="@+id/btn_restar_impostor"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
-                    android:src="@drawable/ic_remove"
                     android:background="@android:color/transparent"
                     android:contentDescription="Restar Impostor"
+                    android:src="@drawable/ic_remove"
                     app:tint="@color/icon_impostor" />
 
                 <TextView
                     android:id="@+id/tv_num_impostores"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
                     android:text="1"
                     android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginHorizontal="8dp" />
+                    android:textStyle="bold" />
 
                 <ImageButton
                     android:id="@+id/btn_sumar_impostor"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
-                    android:src="@drawable/ic_add"
                     android:background="@android:color/transparent"
                     android:contentDescription="Sumar Impostor"
+                    android:src="@drawable/ic_add"
                     app:tint="@color/icon_impostor" />
             </LinearLayout>
 
@@ -143,31 +155,32 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="12dp"
-                android:gravity="center_vertical">
+                android:paddingVertical="12dp">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_lightbulb"
                     android:contentDescription="Icono de Pista"
+                    android:src="@drawable/ic_lightbulb"
                     app:tint="@color/icon_lightbulb" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_weight="1"
                     android:text="Pistas para Impostores"
-                    android:textSize="16sp"
-                    android:layout_marginStart="16dp" />
+                    android:textSize="16sp" />
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/switch_pistas"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    app:tint="@color/icon_lightbulb" /> </LinearLayout>
+                    app:tint="@color/icon_lightbulb" />
+            </LinearLayout>
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
@@ -184,9 +197,9 @@
         android:layout_height="wrap_content"
         app:cardCornerRadius="12dp"
         app:cardElevation="6dp"
-        app:layout_constraintTop_toBottomOf="@id/spacer"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/spacer">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -197,47 +210,47 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:text="Paquetes y Duración"
                 android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp" />
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:id="@+id/ll_paquetes_config"
                 style="@style/ConfigRowStyle"
+                android:background="?attr/selectableItemBackground"
                 android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackground">
+                android:focusable="true">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_package"
                     android:contentDescription="Icono de Paquetes"
+                    android:src="@drawable/ic_package"
                     app:tint="@color/icon_package" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_weight="1"
                     android:text="Paquetes Seleccionados"
-                    android:textSize="16sp"
-                    android:layout_marginStart="16dp" />
+                    android:textSize="16sp" />
 
                 <TextView
                     android:id="@+id/tv_cantidad_paquetes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="3"
+                    android:textColor="@color/icon_package"
                     android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/icon_package" />
+                    android:textStyle="bold" />
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_arrow_forward"
                     android:contentDescription="Ir a selección de paquetes"
+                    android:src="@drawable/ic_arrow_forward"
                     app:tint="@color/divider_color" />
             </LinearLayout>
 
@@ -246,39 +259,39 @@
             <LinearLayout
                 android:id="@+id/ll_tiempo_config"
                 style="@style/ConfigRowStyle"
+                android:background="?attr/selectableItemBackground"
                 android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackground">
+                android:focusable="true">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_timer"
                     android:contentDescription="Icono de Duración"
+                    android:src="@drawable/ic_timer"
                     app:tint="@color/icon_timer" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_weight="1"
                     android:text="Duración del Juego"
-                    android:textSize="16sp"
-                    android:layout_marginStart="16dp" />
+                    android:textSize="16sp" />
 
                 <TextView
                     android:id="@+id/tv_duracion_tiempo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="5 min"
+                    android:textColor="@color/icon_timer"
                     android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/icon_timer" />
+                    android:textStyle="bold" />
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_arrow_forward"
                     android:contentDescription="Ir a configuración de tiempo"
+                    android:src="@drawable/ic_arrow_forward"
                     app:tint="@color/divider_color" />
             </LinearLayout>
 
@@ -289,16 +302,16 @@
         android:id="@+id/btn_iniciar_juego"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
         android:text="Iniciar Juego"
         android:textColor="@color/text_primary_darkmode"
         android:textSize="20sp"
-        android:paddingTop="14dp"
-        android:paddingBottom="14dp"
-        app:cornerRadius="10dp"
-        android:layout_marginBottom="16dp"
         app:backgroundTint="@color/colorPrimary"
+        app:cornerRadius="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

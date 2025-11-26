@@ -51,11 +51,44 @@ public class DataBase {
         palabrasSemanaSanta.put("Mantilla", "Velo");
         palabrasSemanaSanta.put("Capataces", "Llamador");
         palabrasSemanaSanta.put("Saeta", "Canto");
-        palabrasSemanaSanta.put("Incienso", "Cera");
+        palabrasSemanaSanta.put("Incienso", "Humo");
         palabrasSemanaSanta.put("Cruz", "Guía");
         palabrasSemanaSanta.put("Palio", "Bambalinas");
         palabrasSemanaSanta.put("Cuaresma", "Penitencia");
         palabrasSemanaSanta.put("Misterio", "Pasaje");
+
+        palabrasSemanaSanta.put("Domingo", "Ramos");
+        palabrasSemanaSanta.put("Madrugá", "Silencio");
+        palabrasSemanaSanta.put("Pasos", "Flores");
+        palabrasSemanaSanta.put("Marcha", "Procesional");
+        palabrasSemanaSanta.put("Orfebrería", "Plata");
+        palabrasSemanaSanta.put("Semana", "Mayor");
+        palabrasSemanaSanta.put("Estación", "Penitencia");
+        palabrasSemanaSanta.put("Carrera", "Oficial");
+        palabrasSemanaSanta.put("Banda", "Música");
+        palabrasSemanaSanta.put("Jesús", "Cristo");
+
+        palabrasSemanaSanta.put("Claveles", "Flores");
+        palabrasSemanaSanta.put("Manolas", "Dolorosa");
+        palabrasSemanaSanta.put("Cirio", "Luz");
+        palabrasSemanaSanta.put("Penitente", "Promesa");
+        palabrasSemanaSanta.put("Bulla", "Gentío");
+        palabrasSemanaSanta.put("Madera", "Talla");
+        palabrasSemanaSanta.put("Guión", "Estandarte");
+        palabrasSemanaSanta.put("Prioste", "Mayordomo"); // Se cambió "Fiscal" por "Mayordomo" para variedad
+        palabrasSemanaSanta.put("Silencio", "Recogimiento");
+        palabrasSemanaSanta.put("Capilla", "Iglesia");
+
+        palabrasSemanaSanta.put("Triduo", "Pascual");
+        palabrasSemanaSanta.put("Sagrario", "Monumento");
+        palabrasSemanaSanta.put("Pregón", "Anuncio");
+        palabrasSemanaSanta.put("Bocinas", "Heráldicas");
+        palabrasSemanaSanta.put("Medalla", "Hermandad");
+        palabrasSemanaSanta.put("Altar", "Culto");
+        palabrasSemanaSanta.put("Fiscal", "Recorrido"); // Nuevo par
+        palabrasSemanaSanta.put("Vía", "Crucis");
+        palabrasSemanaSanta.put("Lágrimas", "Dolorosa");
+        palabrasSemanaSanta.put("Viernes", "Santo");
 
         semanaSanta = new Categoria(
                 "Semana Santa",

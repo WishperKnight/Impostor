@@ -6,12 +6,14 @@ public class Jugador implements Serializable {
     private String name;
     private String role; // Rol: Civil o Impostor
     private String colorHex; // Nuevo campo: Color en formato Hex
+    private String profileImageUri = null;
 
     // Constructor que acepta el nombre y asigna un color por defecto
     public Jugador(String name) {
         this.name = name;
         this.role = "Civil"; // Rol por defecto
         this.colorHex = "#FF4081"; // Color Rosa/Magenta por defecto (ejemplo)
+        this.profileImageUri=null;
     }
 
     // Constructor completo (si lo necesitas)
@@ -22,6 +24,15 @@ public class Jugador implements Serializable {
     }
 
     // --- Getters y Setters ---
+
+
+    public String getProfileImageUri() {
+        return profileImageUri;
+    }
+
+    public void setProfileImageUri(String profileImageUri) {
+        this.profileImageUri = profileImageUri;
+    }
 
     public String getName() {
         return name;

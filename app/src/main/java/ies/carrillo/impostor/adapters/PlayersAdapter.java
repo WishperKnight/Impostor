@@ -1,7 +1,7 @@
 package ies.carrillo.impostor.adapters;
 
 import android.graphics.Color;
-import android.graphics.PorterDuff;
+import android.net.Uri; // Necesario para parsear la URI de la imagen
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +38,7 @@ public class PlayersAdapter extends RecyclerView.Adapter<PlayersAdapter.PlayerVi
     @NonNull
     @Override
     public PlayerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Asegúrate de que este layout (player_item.xml) existe y contiene la ImageView
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_player, parent, false);
         return new PlayerViewHolder(view);
     }
@@ -47,30 +48,37 @@ public class PlayersAdapter extends RecyclerView.Adapter<PlayersAdapter.PlayerVi
         Jugador jugador = playersList.get(position);
         holder.tvPlayerName.setText(jugador.getName());
 
-        // --- LÓGICA DE APLICAR EL COLOR DE FONDO Y AL INDICADOR ---
+        // --- LÓGICA DE FOTO DE PERFIL (NUEVO) ---
+        String imageUriString = jugador.getProfileImageUri();
+
+        if (imageUriString != null && !imageUriString.isEmpty()) {
+            try {
+                // Si existe una URI, la cargamos en el ImageView.
+                holder.imgColorIndicator.setImageURI(Uri.parse(imageUriString));
+                // Aseguramos que el ImageView tiene el fondo de forma circular para el borde
+                holder.imgColorIndicator.setBackgroundResource(R.drawable.shape_circle_stroke);
+            } catch (Exception e) {
+                // Manejar errores de URI, si el archivo ha sido eliminado
+                holder.imgColorIndicator.setImageResource(R.drawable.ic_default_profile);
+                holder.imgColorIndicator.setBackgroundResource(R.drawable.shape_circle_stroke);
+            }
+        } else {
+            // Si no hay URI, mostramos la imagen por defecto.
+            holder.imgColorIndicator.setImageResource(R.drawable.ic_default_profile);
+            // Aseguramos que el ImageView tiene el fondo de forma circular para el borde
+            holder.imgColorIndicator.setBackgroundResource(R.drawable.shape_circle_stroke);
+        }
+        // ------------------------------------------
+
+        // --- LÓGICA DE COLOR DE FONDO ---
         try {
             int colorInt = Color.parseColor(jugador.getColorHex());
-
-            // 1. Aplicar el color de fondo al ConstraintLayout completo
-            // Esto es correcto y se mantiene.
             holder.clPlayerItemContainer.setBackgroundColor(colorInt);
-
-            /*
-             * CAMBIO CLAVE:
-             * Se ELIMINA la línea que aplica el tinte (setColorFilter) al ImageView
-             * del indicador (imgColorIndicator). Esto permite que el icono
-             * mantenga su color original (ej: gris, negro, o el que tenga su vector drawable).
-             *
-             * holder.imgColorIndicator.setColorFilter(colorInt, PorterDuff.Mode.SRC_IN);
-             */
-
         } catch (IllegalArgumentException e) {
-            // Manejar color no válido (ej: usar Gris por defecto)
             holder.clPlayerItemContainer.setBackgroundColor(Color.GRAY);
-            // Si hay un error, dejamos el icono sin tinte.
         }
 
-        // Listener para CAMBIAR COLOR (al hacer clic en el círculo)
+        // Listener para CAMBIAR COLOR / FOTO (al hacer clic en el círculo)
         holder.imgColorIndicator.setOnClickListener(v -> {
             listener.onColorIndicatorClicked(holder.getAdapterPosition());
         });
@@ -92,13 +100,14 @@ public class PlayersAdapter extends RecyclerView.Adapter<PlayersAdapter.PlayerVi
     public static class PlayerViewHolder extends RecyclerView.ViewHolder {
         TextView tvPlayerName;
         ImageButton btnDeletePlayer;
-        ImageView imgColorIndicator;
+        ImageView imgColorIndicator; // Ahora muestra la foto de perfil
         ConstraintLayout clPlayerItemContainer;
 
         public PlayerViewHolder(@NonNull View itemView) {
             super(itemView);
             tvPlayerName = itemView.findViewById(R.id.tv_player_name_item);
             btnDeletePlayer = itemView.findViewById(R.id.btn_delete_player);
+            // Asegúrate de que el ID es correcto según tu layout
             imgColorIndicator = itemView.findViewById(R.id.img_color_indicator);
             clPlayerItemContainer = itemView.findViewById(R.id.cl_player_item_container);
         }
