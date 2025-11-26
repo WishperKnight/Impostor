@@ -31,21 +31,17 @@ import ies.carrillo.impostor.roles.Roles;
 
 public class InGameActivity extends AppCompatActivity implements PlayersAdapter.OnPlayerActionListener {
 
-    // Constantes de Intent (Buenas prácticas)
     public static final String EXTRA_PLAYERS_WITH_ROLES = "JUGADORES_CON_ROLES";
     public static final String EXTRA_DURATION_MINUTES = "DURACION_MINUTOS";
 
-    // UI
     private TextView tvTimer;
     private RecyclerView rvActivePlayers;
     private LinearLayout overlayEndGame;
-    private TextView tvEndGameTitle;
-    private TextView tvEndGameSubtitle;
+    private TextView tvEndGameTitle, tvEndGameSubtitle;
     private MaterialButton btnBackToMenu;
 
-    // Lógica
     private PlayersAdapter adapter;
-    private List<Jugador> activePlayers = new ArrayList<>();
+    private final List<Jugador> activePlayers = new ArrayList<>();
     private CountDownTimer countDownTimer;
     private long timeLeftInMillis;
 
@@ -56,69 +52,60 @@ public class InGameActivity extends AppCompatActivity implements PlayersAdapter.
         setContentView(R.layout.activity_in_game);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
             return insets;
         });
 
-        inicializarVistas();
-        recuperarDatosIntent();
-        configurarRecyclerView();
+        initViews();
+        loadIntentData();
+        setupRecyclerView();
         startTimer();
     }
 
-    private void inicializarVistas() {
+    private void initViews() {
         tvTimer = findViewById(R.id.tv_timer);
         rvActivePlayers = findViewById(R.id.rv_active_players);
 
-        // Pantalla de Fin de Juego
         overlayEndGame = findViewById(R.id.overlay_end_game);
         tvEndGameTitle = findViewById(R.id.tv_end_game_title);
         tvEndGameSubtitle = findViewById(R.id.tv_end_game_subtitle);
         btnBackToMenu = findViewById(R.id.btn_back_to_menu);
 
         btnBackToMenu.setOnClickListener(v -> {
-            // Volver al menú principal y limpiar la pila de actividades
-            Intent intent = new Intent(InGameActivity.this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+            Intent i = new Intent(this, MainActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
         });
     }
 
-    private void recuperarDatosIntent() {
+    private void loadIntentData() {
         Intent intent = getIntent();
-        if (intent != null) {
-            // 1. Recuperar Jugadores usando la constante
-            List<Jugador> receivedPlayers = (List<Jugador>) intent.getSerializableExtra(EXTRA_PLAYERS_WITH_ROLES);
-            if (receivedPlayers != null) {
-                activePlayers.clear();
-                activePlayers.addAll(receivedPlayers);
-            }
 
-            // 2. Recuperar Duración usando la constante
-            int minutos = intent.getIntExtra(EXTRA_DURATION_MINUTES, 5);
-            timeLeftInMillis = (long) minutos * 60 * 1000;
+        List<Jugador> received = (List<Jugador>) intent.getSerializableExtra(EXTRA_PLAYERS_WITH_ROLES);
+        if (received != null) {
+            activePlayers.clear();
+            activePlayers.addAll(received);
         }
+
+        int minutes = intent.getIntExtra(EXTRA_DURATION_MINUTES, 5);
+        timeLeftInMillis = minutes * 60_000L;
     }
 
-    private void configurarRecyclerView() {
+    private void setupRecyclerView() {
         rvActivePlayers.setLayoutManager(new LinearLayoutManager(this));
-        // Usamos el mismo adaptador que antes, esta actividad implementa la interfaz para la eliminación/votación
         adapter = new PlayersAdapter(activePlayers, this);
         rvActivePlayers.setAdapter(adapter);
     }
 
     private void startTimer() {
-        if (timeLeftInMillis <= 0) {
-            Toast.makeText(this, "Duración del juego no válida, usando 5 minutos.", Toast.LENGTH_SHORT).show();
-            timeLeftInMillis = 5 * 60 * 1000;
-        }
+        if (timeLeftInMillis <= 0) timeLeftInMillis = 300_000;
 
         countDownTimer = new CountDownTimer(timeLeftInMillis, 1000) {
             @Override
-            public void onTick(long millisUntilFinished) {
-                timeLeftInMillis = millisUntilFinished;
-                updateCountDownText();
+            public void onTick(long remaining) {
+                timeLeftInMillis = remaining;
+                updateTimerText();
             }
 
             @Override
@@ -126,132 +113,92 @@ public class InGameActivity extends AppCompatActivity implements PlayersAdapter.
                 tvTimer.setText("¡TIEMPO!");
                 tvTimer.setTextColor(Color.RED);
                 Toast.makeText(InGameActivity.this, "El tiempo ha terminado. ¡Votad!", Toast.LENGTH_LONG).show();
-                // Si el tiempo se acaba y hay suficientes impostores, ganan automáticamente (opcional).
-                // checkWinCondition();
             }
         }.start();
     }
 
-    private void updateCountDownText() {
-        int minutes = (int) (timeLeftInMillis / 1000) / 60;
-        int seconds = (int) (timeLeftInMillis / 1000) % 60;
-        String timeFormatted = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
-        tvTimer.setText(timeFormatted);
+    private void updateTimerText() {
+        int m = (int) (timeLeftInMillis / 1000) / 60;
+        int s = (int) (timeLeftInMillis / 1000) % 60;
+        tvTimer.setText(String.format(Locale.getDefault(), "%02d:%02d", m, s));
     }
-
-    // ****************************************************************
-    // IMPLEMENTACIÓN DE PlayersAdapter.OnPlayerActionListener
-    // ****************************************************************
 
     @Override
     public void onPlayerDelete(int position) {
-        // En esta pantalla, el botón "Borrar" o "Click" actúa como ELIMINAR/VOTAR
-        confirmarEliminacion(position);
+        confirmDeletion(position);
     }
 
     @Override
     public void onPlayerCountChanged(int count) {
-        // Método de la interfaz, no crítico en esta Activity.
-        // Se podría usar para actualizar un contador global de jugadores.
     }
 
-    /**
-     * IMPORTANTE: Implementación necesaria del método de la interfaz,
-     * aunque no se use en esta Activity (el color ya está fijado).
-     */
     @Override
     public void onPlayerColorChange(int position, String newColorHex) {
-        // No implementado ni requerido en el juego.
     }
 
-    /**
-     * IMPORTANTE: Implementación necesaria del método de la interfaz,
-     * aunque no se use en esta Activity (el color ya está fijado).
-     */
     @Override
     public void onColorIndicatorClicked(int position) {
-        // No implementado ni requerido en el juego.
-        // Opcional: Mostrar un Toast informando que no se puede cambiar el color.
-        // Toast.makeText(this, "No se puede cambiar el color durante el juego.", Toast.LENGTH_SHORT).show();
     }
 
-    // ****************************************************************
-    // LÓGICA DE ELIMINACIÓN Y FIN DE JUEGO
-    // ****************************************************************
-
-    private void confirmarEliminacion(int position) {
-        Jugador jugador = activePlayers.get(position);
+    private void confirmDeletion(int position) {
+        Jugador j = activePlayers.get(position);
 
         new AlertDialog.Builder(this)
                 .setTitle("¿VOTACIÓN FINAL?")
-                .setMessage("¿Estáis seguros de ELIMINAR a " + jugador.getName().toUpperCase(Locale.getDefault()) + "? ¡No hay vuelta atrás!")
-                .setPositiveButton("Sí, eliminar", (dialog, which) -> {
-                    eliminarJugador(position);
-                })
+                .setMessage("¿Eliminar a " + j.getName().toUpperCase() + "?")
+                .setPositiveButton("Eliminar", (d, w) -> removePlayer(position))
                 .setNegativeButton("Cancelar", null)
                 .show();
     }
 
-    private void eliminarJugador(int position) {
-        Jugador eliminado = activePlayers.get(position);
+    private void removePlayer(int position) {
+        Jugador out = activePlayers.get(position);
 
-        // Mostrar su rol al ser eliminado
-        String rol = (eliminado.getRole().equals(Roles.IMPOSTOR)) ? "IMPOSTOR" : "CIVIL";
-        Toast.makeText(this, eliminado.getName() + " era " + rol, Toast.LENGTH_LONG).show();
+        // Comparación correcta con String
+        String rolTexto = "IMPOSTOR".equals(out.getRole()) ? "IMPOSTOR" : "CIVIL";
+        Toast.makeText(this, out.getName() + " era " + rolTexto, Toast.LENGTH_LONG).show();
 
-        // Eliminar de la lista y notificar al adaptador
         activePlayers.remove(position);
         adapter.notifyItemRemoved(position);
 
-        // Comprobar victoria
         checkWinCondition();
     }
 
     private void checkWinCondition() {
-        long impostorCount = 0;
+        if (activePlayers.isEmpty()) return;
 
-        // Contar el número de impostores activos
-        for (Jugador j : activePlayers) {
-            if (j.getRole().equals(Roles.IMPOSTOR)) {
-                impostorCount++;
-            }
-        }
+        // Contar impostores correctamente usando String
+        long impostors = activePlayers.stream()
+                .filter(j -> "IMPOSTOR".equals(j.getRole()))
+                .count();
 
-        int totalPlayers = activePlayers.size();
-        long civilCount = totalPlayers - impostorCount;
+        long civils = activePlayers.size() - impostors;
 
-        // 1. VICTORIA DE LOS CIVILES 🟢
-        // Condición: No queda ningún impostor.
-        if (impostorCount == 0) {
-            showEndGame(true, "¡VICTORIA de los Civiles! 🏆", "Todos los impostores han sido eliminados.");
+        if (impostors == 0) {
+            showEndGame(true,
+                    "¡VICTORIA de los Civiles! 🏆",
+                    "Todos los impostores han sido eliminados.");
             return;
         }
 
-        // 2. VICTORIA DEL IMPOSTOR 🔴
-        // Condición: Quedan tantos o MÁS impostores que civiles (ImpostorCount >= CivilCount)
-        if (impostorCount >= civilCount) {
-            showEndGame(false, "¡VICTORIA del Impostor! 🔪", "Los impostores han superado en número a los civiles.");
-            return;
+        if (impostors >= civils) {
+            showEndGame(false,
+                    "¡VICTORIA del Impostor! 🔪",
+                    "Los impostores han alcanzado el mismo número que los civiles.");
         }
-
-        // Si no se cumple ninguna condición, el juego continúa.
     }
 
+
     private void showEndGame(boolean civilWin, String title, String subtitle) {
-        // Detener timer
         if (countDownTimer != null) countDownTimer.cancel();
 
-        // Bloquear la interacción con la lista (no más eliminaciones)
-        // Opcional: Podrías usar rvActivePlayers.setEnabled(false) si fuera necesario.
-
-        // Configurar la pantalla final
         overlayEndGame.setVisibility(View.VISIBLE);
-
-        int overlayColor = civilWin ?
-                Color.argb(190, 76, 175, 80) : // Verde semitransparente (más opaco)
-                Color.argb(190, 244, 67, 54);  // Rojo semitransparente (más opaco)
-
-        overlayEndGame.setBackgroundColor(overlayColor);
+        overlayEndGame.setBackgroundColor(
+                Color.argb(190,
+                        civilWin ? 76 : 244,
+                        civilWin ? 175 : 67,
+                        civilWin ? 80 : 54)
+        );
 
         tvEndGameTitle.setText(title);
         tvEndGameSubtitle.setText(subtitle);
@@ -260,8 +207,6 @@ public class InGameActivity extends AppCompatActivity implements PlayersAdapter.
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (countDownTimer != null) {
-            countDownTimer.cancel();
-        }
+        if (countDownTimer != null) countDownTimer.cancel();
     }
 }

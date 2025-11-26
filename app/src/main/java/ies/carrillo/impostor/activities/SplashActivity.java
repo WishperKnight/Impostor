@@ -3,49 +3,44 @@ package ies.carrillo.impostor.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.widget.ProgressBar;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import ies.carrillo.impostor.R;
 
 public class SplashActivity extends AppCompatActivity {
 
-    // Duración del splash screen en milisegundos (2000 ms = 2 segundos)
-    private static final int SPLASH_SCREEN_DURATION = 2000;
+    private ProgressBar progressBar;
+    private int progressStatus = 0;
+    private final int SPLASH_DURATION = 3000; // 3 segundos
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_splash);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
-        // --- Lógica del Splash Screen ---
+        progressBar = findViewById(R.id.progressBar);
 
-        // Creamos un Handler para retrasar la ejecución de la siguiente acción
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // 1. Crear un Intent para iniciar la MainActivity
-                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+        // Animación de la barra de progreso
+        new Thread(() -> {
+            while (progressStatus < 100) {
+                progressStatus += 1;
+                runOnUiThread(() -> progressBar.setProgress(progressStatus));
 
-                // 2. Iniciar la MainActivity
-                startActivity(intent);
-
-                // 3. Finalizar la SplashActivity para que el usuario no pueda volver a ella
-                // con el botón de retroceso
-                finish();
+                try {
+                    Thread.sleep(SPLASH_DURATION / 100); // Distribuye el progreso en 3 segundos
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        }, SPLASH_SCREEN_DURATION); // El retraso se aplica aquí (2000 ms)
 
-        // --- Fin de la lógica del Splash Screen ---
+            // Abrir MainActivity al finalizar
+            runOnUiThread(() -> {
+                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            });
+        }).start();
     }
 }

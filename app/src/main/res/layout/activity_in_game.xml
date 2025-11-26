@@ -47,7 +47,6 @@
         android:id="@+id/overlay_end_game"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="#CC000000"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone"

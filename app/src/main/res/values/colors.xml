@@ -10,6 +10,7 @@
     <color name="colorCyanBright">#33FFCE</color>
     <color name="colorDeepPurple">#5733FF</color>
     <color name="colorNeonYellow">#FFFF33</color>
+    <color name="teal_200">#03DAC5</color>'
     <color name="colorError">#CC4529</color>           <color name="background_light">#F5F5FF</color>
     <color name="text_primary">@color/black</color>
     <color name="text_secondary">#AAAAAA</color>

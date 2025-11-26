@@ -9,8 +9,8 @@
 
     <ImageView
         android:id="@+id/iv_app_icon"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
         android:layout_marginTop="32dp"
         android:contentDescription="Icono de la aplicación Impostor"
         android:src="@drawable/ic_launcher"
@@ -178,8 +178,7 @@
                     android:id="@+id/switch_pistas"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checked="true"
-                    app:tint="@color/icon_lightbulb" />
+                    android:checked="true"/>
             </LinearLayout>
 
         </LinearLayout>
@@ -242,7 +241,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="3"
-                    android:textColor="@color/icon_package"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -283,7 +281,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="5 min"
-                    android:textColor="@color/icon_timer"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
