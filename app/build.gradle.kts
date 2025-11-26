@@ -13,9 +13,6 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // Nombre de la app dinámico según el nombre del proyecto
-        resValue("string", "app_name", project.name)
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

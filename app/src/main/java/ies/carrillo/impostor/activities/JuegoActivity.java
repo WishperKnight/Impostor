@@ -42,7 +42,7 @@ public class JuegoActivity extends AppCompatActivity {
     private TextView tvPlayerWord;
     private ImageView imgMaskCover;
     private TextView tvInstruction;
-    private ImageView imgLockIcon;
+    //  private ImageView imgLockIcon;
     private LinearLayout llRoleContent;
     private MaterialButton btnAction;
     private MaterialButton btnNextPlayer;
@@ -99,7 +99,7 @@ public class JuegoActivity extends AppCompatActivity {
 
         imgMaskCover = findViewById(R.id.img_mask_cover);
         tvInstruction = findViewById(R.id.tv_instruction);
-        imgLockIcon = findViewById(R.id.img_lock_icon);
+//        imgLockIcon = findViewById(R.id.img_lock_icon);
 
         llRoleContent = findViewById(R.id.ll_role_content);
         btnAction = findViewById(R.id.btn_action);
@@ -140,11 +140,11 @@ public class JuegoActivity extends AppCompatActivity {
         });
 
         // El icono de candado también
-        imgLockIcon.setOnClickListener(v -> {
-            if (!isRoleRevealed) {
-                handleActionButton();
-            }
-        });
+//        imgLockIcon.setOnClickListener(v -> {
+//            if (!isRoleRevealed) {
+//                handleActionButton();
+//            }
+//        });
     }
 
     /**
@@ -241,7 +241,7 @@ public class JuegoActivity extends AppCompatActivity {
                 // Ocultar permanentemente los elementos de la máscara
                 imgMaskCover.setVisibility(View.GONE);
                 tvInstruction.setVisibility(View.GONE);
-                imgLockIcon.setVisibility(View.GONE);
+                //      imgLockIcon.setVisibility(View.GONE);
 
                 // Habilitamos el botón y cambiamos el texto
                 btnAction.setText(STATE_REVEALED);
@@ -255,7 +255,7 @@ public class JuegoActivity extends AppCompatActivity {
 
         imgMaskCover.startAnimation(slideOut);
         tvInstruction.startAnimation(slideOut);
-        imgLockIcon.startAnimation(slideOut);
+        //       imgLockIcon.startAnimation(slideOut);
     }
 
     private void prepararContenidoRol(Roles rolActual) {
@@ -296,8 +296,8 @@ public class JuegoActivity extends AppCompatActivity {
             tvInstruction.setVisibility(View.VISIBLE);
             tvInstruction.clearAnimation();
 
-            imgLockIcon.setVisibility(View.VISIBLE);
-            imgLockIcon.clearAnimation();
+            //    imgLockIcon.setVisibility(View.VISIBLE);
+            //   imgLockIcon.clearAnimation();
 
             llRoleContent.setVisibility(View.INVISIBLE);
 
